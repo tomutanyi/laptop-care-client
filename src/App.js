@@ -7,7 +7,7 @@ function App() {
       <header className="App-header">
         <img src={logo} className="App-logo" alt="logo" />
         <p>
-          Edit <code>src/App.js</code> and save file.
+          Edit <code>src/App.js</code> Changed to github org.
         </p>
         <a
           className="App-link"
@@ -23,3 +23,4 @@ function App() {
 }
 
 export default App;
+
