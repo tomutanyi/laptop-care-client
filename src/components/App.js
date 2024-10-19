@@ -1,25 +1,25 @@
-import logo from './logo.svg';
-import './App.css';
+// src/components/App.js
+import React from 'react';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import Signup from './Signup';
+import Navbar from './Navbar';
+import Login from './Login';
 
-function App() {
+const App = () => {
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-r from-blue-400 to-purple-600">
-      <header className="flex flex-col items-center">
-        <img src={logo} className="w-32 h-32 animate-spin-slow" alt="logo" />
-        <p className="mt-4 text-xl text-white">
-          Edit <code className="bg-white p-1 rounded text-black">src/App.js</code> Changed to Trello.
-        </p>
-        <a
-          className="mt-4 text-white hover:text-gray-200 underline"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Router>
+      <div>
+        <Navbar />
+
+        <Routes>
+          <Route path="/" element={<h1>Welcome to the Laptop Care App</h1>} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/login" element={<Login />} />
+        </Routes>
+      </div>
+    </Router>
   );
-}
+};
 
 export default App;
+ 
