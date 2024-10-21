@@ -8,16 +8,16 @@ const Login = ({ onLogin }) => {
 
   const formik = useFormik({
     initialValues: {
-      email: '',
+      username: '',
       password: '',
     },
     validationSchema: Yup.object({
-      email: Yup.string().email('Invalid email address').required('Required'),
-      password: Yup.string().required('Required'),
+      username: Yup.string().required('Username is required'),
+      password: Yup.string().required('Password is required'),
     }),
     onSubmit: async (values) => {
       try {
-        const response = await fetch('url', {
+        const response = await fetch('https://laptop-care-server.onrender.com/users/login', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -49,22 +49,22 @@ const Login = ({ onLogin }) => {
         <h2 className="text-3xl font-bold text-center">Login</h2>
         <form onSubmit={formik.handleSubmit} className="space-y-4">
           <div>
-            <label htmlFor="email" className="block mb-1 text-sm font-medium text-gray-700">
-              Email
+            <label htmlFor="username" className="block mb-1 text-sm font-medium text-gray-700">
+              Username
             </label>
             <input
-              id="email"
-              name="email"
-              type="email"
+              id="username"
+              name="username"
+              type="text"
               className={`w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500 ${
-                formik.touched.email && formik.errors.email ? 'border-red-500' : 'border-gray-300'
+                formik.touched.username && formik.errors.username ? 'border-red-500' : 'border-gray-300'
               }`}
-              value={formik.values.email}
+              value={formik.values.username}
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
             />
-            {formik.touched.email && formik.errors.email ? (
-              <div className="mt-1 text-sm text-red-500">{formik.errors.email}</div>
+            {formik.touched.username && formik.errors.username ? (
+              <div className="mt-1 text-sm text-red-500">{formik.errors.username}</div>
             ) : null}
           </div>
 
