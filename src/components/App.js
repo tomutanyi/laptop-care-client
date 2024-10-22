@@ -1,35 +1,32 @@
 // src/components/App.js
-import React, {useState} from 'react';
+import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { UserProvider } from './UserContext'; // Import the UserProvider
 import Signup from './Signup';
 import Navbar from './Navbar';
 import Login from './Login';
 import JobCard from './JobCard';
-
+import Technician from './Technician';
+import Admin from './Admin';
 
 const App = () => {
-
-  const [user, setUser] = useState(null);
-
-  const handleLogin = (userData) => {
-  setUser(userData);
-  console.log('Logged in user:', userData);
-  };
   return (
-    <Router>
-      <div>
-        <Navbar />
-
-        <Routes>
-          <Route path="/" element={<h1>Welcome to the Laptop Care App</h1>} />
-          <Route path="/signup" element={<Signup />} />
-          <Route path="/login" element={<Login onLogin={handleLogin} />} />
-          <Route path="/jobs" element={<JobCard />} />
-        </Routes>
-      </div>
-    </Router>
+    <UserProvider>
+      <Router>
+        <div>
+          <Navbar />
+          <Routes>
+            <Route path="/" element={<h1>Welcome to the Laptop Care App</h1>} />
+            <Route path="/signup" element={<Signup />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/jobs" element={<JobCard />} />
+            <Route path="/technician" element={<Technician />} />
+            <Route path="/admin" element={<Admin />} />
+          </Routes>
+        </div>
+      </Router>
+    </UserProvider>
   );
 };
 
 export default App;
- 
