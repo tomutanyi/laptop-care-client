@@ -1,10 +1,12 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { useNavigate } from 'react-router-dom';
+import { UserContext } from './UserContext'; // Adjust the import path if necessary
 
-const Login = ({ onLogin }) => {
+const Login = () => {
   const navigate = useNavigate();
+  const { login } = useContext(UserContext); // Access the login function from context
 
   const formik = useFormik({
     initialValues: {
@@ -17,7 +19,9 @@ const Login = ({ onLogin }) => {
     }),
     onSubmit: async (values) => {
       try {
-        const response = await fetch('https://laptop-care-server.onrender.com/users/login', {
+        console.log('Logging in with username:', values.username);
+
+        const response = await fetch('http://127.0.0.1:5000/users/login', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -33,10 +37,21 @@ const Login = ({ onLogin }) => {
         const data = await response.json();
         console.log('Login success:', data);
 
-        localStorage.setItem('user_id', data.user_id);
+        // Assuming the backend returns user_id, username, role, and access_token in the response
+        const { access_token, id, username, role } = data;
 
-        onLogin(data);
-        navigate('/');
+        // Call the login function from UserContext
+        login({ access_token, id, username, role });
+
+        // Navigate based on user role
+        if (role === 'admin') {
+          navigate('/admin');
+        } else if (role === 'technician') {
+          navigate('/technician');
+        } else {
+          // Default navigation for other roles, e.g., clerk
+          navigate('/');
+        }
       } catch (error) {
         console.error('Error during login:', error);
       }
