@@ -1,7 +1,6 @@
 import React from "react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
-import axios from "axios";
 
 
 const JobCardSchema = Yup.object().shape({
@@ -19,16 +18,25 @@ const JobCardSchema = Yup.object().shape({
 const JobCard = () => {
   const handleSubmit = async (values, { setSubmitting, resetForm }) => {
     try {
-      
-      const response = await axios.post("/url/jobcards", values);
-      console.log("Job card created:", response.data);
-     
-      
+      const response = await fetch("/url/jobcards", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(values),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log("Job card created:", data);
     } catch (error) {
       console.error("Error creating job card:", error);
     } finally {
-        setSubmitting(false);
-        resetForm();
+      setSubmitting(false);
+      resetForm();
     }
   };
 

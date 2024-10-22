@@ -27,7 +27,7 @@ const Signup = () => {
     }),
     onSubmit: async (values) => {
       try {
-        const response = await fetch('url', {
+        const response = await fetch('https://laptop-care-server.onrender.com/users', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
