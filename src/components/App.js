@@ -16,10 +16,10 @@ const App = () => {
         <div>
           <Navbar />
           <Routes>
-            <Route path="/" element={<h1>Welcome to the Laptop Care App</h1>} />
+            <Route path="/home" element={<h1>Welcome to the Laptop Care App</h1>} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/login" element={<Login />} />
-            <Route path="/jobs" element={<JobCard />} />
+            <Route path="/" element={<JobCard />} />
             <Route path="/technician" element={<Technician />} />
             <Route path="/admin" element={<Admin />} />
           </Routes>
