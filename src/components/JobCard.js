@@ -1,7 +1,12 @@
-import React, { useState } from "react";
-import { Formik, Form, Field, ErrorMessage } from "formik";
-import Stepper from "react-stepper-horizontal";
+// import { IoAdd, IoBalloonSharp } from "react-icons/io5";
 import * as Yup from "yup";
+import {
+  FormikStepper,
+  InputField,
+  SelectField,
+} from "formik-stepper";
+import "formik-stepper/dist/style.css";
+import { useSnackbar } from "notistack";
 
 const JobCardSchema = Yup.object().shape({
   clientName: Yup.string().required("Client name is required"),
@@ -28,26 +33,16 @@ const JobCardSchema = Yup.object().shape({
 });
 
 const JobCard = () => {
-  const [step, setStep] = useState(0);
+  const { enqueueSnackbar } = useSnackbar();
 
-  const nextStep = () => setStep((prevStep) => prevStep + 1);
-  const prevStep = () => setStep((prevStep) => prevStep - 1);
-
-  const steps = [
-    { title: "Client Information" },
-    { title: "Device Information" },
-    { title: "Job Details" },
-  ];
-
-  const handleSubmit = async (values, { setSubmitting, resetForm }) => {
+  const onSubmit = async (values, { setSubmitting, resetForm }) => {
     try {
-      const response = await fetch("http://192.168.100.10:3000/jobcards", {
+      const response = await fetch("http://127.0.0.1:5000/jobcards", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(
-          {
+        body: JSON.stringify({
           client: {
             name: values.clientName,
             email: values.clientEmail,
@@ -74,31 +69,29 @@ const JobCard = () => {
             status: values.status,
             creation_date: values.creationDate,
             completion_date: values.completionDate,
-          }
+          },
         }),
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      if (response.ok) {
+        enqueueSnackbar("Job card submitted successfully!", { variant: "success" });
+        resetForm();
+      } else {
+        enqueueSnackbar("Failed to submit job card.", { variant: "error" });
       }
-
-      const data = await response.json();
-      console.log("Job card created:", data);
     } catch (error) {
-      console.error("Error creating job card:", error);
+      enqueueSnackbar("An error occurred while submitting the job card.", { variant: "error" });
+      console.error("Error submitting job card:", error);
     } finally {
       setSubmitting(false);
-      resetForm();
     }
   };
 
   return (
-    <div className="mt-8 max-w-2xl mx-auto p-8 bg-gray-100 shadow-lg rounded-lg">
-      <h1 className="text-2xl font-bold mb-6 text-gray-700 text-center">Create Job Card</h1>
-
-      <Stepper steps={steps} activeStep={step} />
-
-      <Formik
+    <div className="min-h-screen bg-gradient-to-tl from-yellow-50 to-yellow-100 flex items-center justify-center">
+      <div className="w-full max-w-lg p-8 bg-white rounded-lg shadow-lg">
+        <FormikStepper
+          onSubmit={onSubmit}
         initialValues={{
           clientName: "",
           clientEmail: "",
@@ -123,84 +116,129 @@ const JobCard = () => {
           completionDate: "",
         }}
         validationSchema={JobCardSchema}
-        onSubmit={handleSubmit}
-      >
-        {({ isSubmitting }) => (
-          <Form className="space-y-6">
-            {/* Step 1: Client Information */}
-            {step === 0 && (
-              <>
-                <div className="flex flex-col">
-                  <label htmlFor="clientName" className="text-sm font-medium text-gray-600">Client Name</label>
-                  <Field type="text" name="clientName" className="p-2 mt-1 border border-gray-300 rounded-md" />
-                  <ErrorMessage name="clientName" component="div" className="text-red-500 text-sm" />
-                </div>
-                <div className="flex flex-col">
-                  <label htmlFor="clientEmail" className="text-sm font-medium text-gray-600">Client Email</label>
-                  <Field type="email" name="clientEmail" className="p-2 mt-1 border border-gray-300 rounded-md" />
-                  <ErrorMessage name="clientEmail" component="div" className="text-red-500 text-sm" />
-                </div>
-                <div className="flex flex-col">
-                  <label htmlFor="clientPhone" className="text-sm font-medium text-gray-600">Client Phone</label>
-                  <Field type="text" name="clientPhone" className="p-2 mt-1 border border-gray-300 rounded-md" />
-                  <ErrorMessage name="clientPhone" component="div" className="text-red-500 text-sm" />
-                </div>
-                <div className="flex flex-col">
-                  <label htmlFor="clientAddress" className="text-sm font-medium text-gray-600">Client Address</label>
-                  <Field type="text" name="clientAddress" className="p-2 mt-1 border border-gray-300 rounded-md" />
-                  <ErrorMessage name="clientAddress" component="div" className="text-red-500 text-sm" />
-                </div>
-              </>
-            )}
-
-            {/* Step 2: Device Information */}
-            {step === 1 && (
-              <>
-                <div className="flex flex-col">
-                  <label htmlFor="deviceModel" className="text-sm font-medium text-gray-600">Device Model</label>
-                  <Field type="text" name="deviceModel" className="p-2 mt-1 border border-gray-300 rounded-md" />
-                  <ErrorMessage name="deviceModel" component="div" className="text-red-500 text-sm" />
-                </div>
-                <div className="flex flex-col">
-                  <label htmlFor="deviceSerialNumber" className="text-sm font-medium text-gray-600">Device Serial Number</label>
-                  <Field type="text" name="deviceSerialNumber" className="p-2 mt-1 border border-gray-300 rounded-md" />
-                  <ErrorMessage name="deviceSerialNumber" component="div" className="text-red-500 text-sm" />
-                </div>
-                <div className="flex flex-col">
-                  <label htmlFor="brand" className="text-sm font-medium text-gray-600">Brand</label>
-                  <Field type="text" name="brand" className="p-2 mt-1 border border-gray-300 rounded-md" />
-                  <ErrorMessage name="brand" component="div" className="text-red-500 text-sm" />
-                </div>
-                {/* Other device fields */}
-              </>
-            )}
-
-            {/* Step 3: Job Details */}
-            {step === 2 && (
-              <>
-                <div className="flex flex-col">
-                  <label htmlFor="problemDescription" className="text-sm font-medium text-gray-600">Problem Description</label>
-                  <Field as="textarea" name="problemDescription" className="p-2 mt-1 border border-gray-300 rounded-md" />
-                  <ErrorMessage name="problemDescription" component="div" className="text-red-500 text-sm" />
-                </div>
-                {/* Other job details fields */}
-              </>
-            )}
-
-            {/* Navigation buttons */}
-            <div className="flex justify-between">
-              {step > 0 && <button type="button" onClick={prevStep} className="bg-gray-300 p-2 rounded">Previous</button>}
-              {step < steps.length - 1 ? (
-                <button type="button" onClick={nextStep} className="bg-blue-500 text-white p-2 rounded">Next</button>
-              ) : (
-                <button type="submit" disabled={isSubmitting} className="bg-green-500 text-white p-2 rounded">
-                  Submit
-                </button>
-              )}
+        withStepperLine
+        nextButton={{
+          label: "Next Step",
+          className: "bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition",
+        }}
+        prevButton={{
+          label: "Previous",
+          className: "bg-gray-300 text-gray-800 px-4 py-2 rounded hover:bg-gray-400 transition",
+        }}
+        submitButton={{
+          label: "Submit",
+          className: "bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition",
+        }}
+        >
+          {/* First Step: Client Information */}
+          <FormikStepper.Step
+            label="Client Info"
+            labelColor="#37bf5e"
+            circleColor="#37bf5e"
+            // Icon={({ active }) => (active ? <IoAdd /> : <IoBalloonSharp />)}
+          >
+            <div className="flex flex-col ">
+              <InputField
+                name="clientName" label="Client Name"
+                className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <InputField
+                name="clientEmail" label="Email" type="email"
+                className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <InputField
+                name="clientPhone" label="Client Phone"
+                className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <InputField
+                name="clientAddress" label="Client Address"
+                className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
             </div>
-          </Form>
-        )}
-      </Formik>
+          </FormikStepper.Step>
+
+          {/* Second Step: Device Information */}
+          <FormikStepper.Step label="Device Info" circleColor="#6f42c1">
+            <div className="flex flex-col space-y-2">
+              <InputField
+                name="deviceModel" label="Device Model"
+                className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <InputField
+                name="deviceSerialNumber" label="Device Serial Number"
+                className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <InputField
+                name="brand" label="Brand"
+                className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <InputField
+                name="hddOrSsd" label="HDD/SSD Type"
+                className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              <InputField
+                name="hddOrSsdSerialNumber" label="HDD/SSD Serial Number"
+                className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <InputField
+                name="memory" label="Memory"
+                className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+          </FormikStepper.Step>
+
+          {/*Step 3: More Device Information*/}
+          <FormikStepper.Step label="Device Info" circleColor="#6f42c1">
+            <div className="flex flex-col space-y-2" >
+               <InputField
+                name="memorySerialNumber" label="Memory Serial Number"
+                className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <InputField
+                name="battery" label="Battery Type"
+                className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <InputField
+                name="batterySerialNumber" label="Battery Serial Number"
+              className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+              <InputField
+                name="adapter" label="Adapter Type"
+                className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <InputField
+                name="adapterSerialNumber" label="Adapter Serial Number"
+                className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <InputField
+                name="warrantyStatus" label="Warranty Status"
+                className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+          </FormikStepper.Step>
+
+          {/* Step 4: Job Details */}
+            <FormikStepper.Step label="Job Details" labelColor="#37bf5e" circleColor="#37bf5e">
+              <div className="space-y-4">
+                <InputField as="textarea" name="problemDescription" label="Problem Description" rows="4" />
+                <InputField name="technicianId" label="Technician ID" />
+              <SelectField
+                name="status"
+                label="Status"
+                labelColor="#dc3545"
+                placeholder="Select"
+                className="w-auto p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                options={[
+                  { value: "pending", label: "Pending" },
+                  { value: "in progress", label: "In progress" },
+                  { value: "completed", label: "Completed" },
+                ]}
+              />
+                <InputField name="creationDate" label="Creation Date" type="date" />
+                <InputField name="completionDate" label="Completion Date" type="date" />
+              </div>
+            </FormikStepper.Step>
+        </FormikStepper>
+      </div>
     </div>
   );
 };
