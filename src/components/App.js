@@ -8,6 +8,7 @@ import Login from './Login';
 import JobCard from './JobCard';
 import Technician from './Technician';
 import Admin from './Admin';
+import Receptionist from './Receptionist';
 
 const App = () => {
   return (
@@ -22,6 +23,7 @@ const App = () => {
             <Route path="/jobcard" element={<JobCard />} />
             <Route path="/technician" element={<Technician />} />
             <Route path="/admin" element={<Admin />} />
+            <Route path="/receptionist" element={<Receptionist />} />
           </Routes>
         </div>
       </Router>
