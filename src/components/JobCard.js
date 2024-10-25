@@ -1,4 +1,3 @@
-// import { IoAdd, IoBalloonSharp } from "react-icons/io5";
 import * as Yup from "yup";
 import {
   FormikStepper,
@@ -29,11 +28,14 @@ const JobCardSchema = Yup.object().shape({
   technicianId: Yup.string().required("Technician ID is required"),
   status: Yup.string().required("Status is required"),
   creationDate: Yup.date().required("Creation date is required"),
-  completionDate: Yup.date().nullable(),
+  // completionDate: Yup.date().nullable(),
 });
 
 const JobCard = () => {
   const { enqueueSnackbar } = useSnackbar();
+
+  const technicianId = localStorage.getItem("technicianId") || "";
+
 
   const onSubmit = async (values, { setSubmitting, resetForm }) => {
     try {
@@ -65,9 +67,9 @@ const JobCard = () => {
           },
           jobDetails: {
             problem_description: values.problemDescription,
-            technician_id: values.technicianId,
+            technician_id:technicianId,
             status: values.status,
-            creation_date: values.creationDate,
+            creation_date: new Date().toISOString(),
             completion_date: values.completionDate,
           },
         }),
@@ -89,7 +91,7 @@ const JobCard = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-tl from-yellow-50 to-yellow-100 flex items-center justify-center">
-      <div className="w-full max-w-lg p-8 bg-white rounded-lg shadow-lg">
+      <div className="w-full max-w-xl p-8 bg-white rounded-lg shadow-lg">
         <FormikStepper
           onSubmit={onSubmit}
         initialValues={{
@@ -110,9 +112,9 @@ const JobCard = () => {
           adapterSerialNumber: "",
           warrantyStatus: "in_warranty",
           problemDescription: "",
-          technicianId: "",
+          technicianId: technicianId,
           status: "pending",
-          creationDate: "",
+          creationDate: new Date().toISOString(),
           completionDate: "",
         }}
         validationSchema={JobCardSchema}
@@ -135,7 +137,6 @@ const JobCard = () => {
             label="Client Info"
             labelColor="#37bf5e"
             circleColor="#37bf5e"
-            // Icon={({ active }) => (active ? <IoAdd /> : <IoBalloonSharp />)}
           >
             <div className="flex flex-col ">
               <InputField
@@ -172,10 +173,15 @@ const JobCard = () => {
                 name="brand" label="Brand"
                 className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
-              <InputField
-                name="hddOrSsd" label="HDD/SSD Type"
+              <SelectField
+                name="hddOrSsd"
+                label="HDD/SSD Type"
+                options={[
+                  { value: "HDD", label: "HDD" },
+                  { value: "SSD", label: "SSD" },
+                ]}
                 className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
+              />
               <InputField
                 name="hddOrSsdSerialNumber" label="HDD/SSD Serial Number"
                 className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -209,8 +215,13 @@ const JobCard = () => {
                 name="adapterSerialNumber" label="Adapter Serial Number"
                 className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
-              <InputField
-                name="warrantyStatus" label="Warranty Status"
+              <SelectField
+                name="warrantyStatus"
+                label="Warranty Status"
+                options={[
+                  { value: "in_warranty", label: "In Warranty" },
+                  { value: "out_of_warranty", label: "Out of Warranty" },
+                ]}
                 className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
@@ -233,8 +244,7 @@ const JobCard = () => {
                   { value: "completed", label: "Completed" },
                 ]}
               />
-                <InputField name="creationDate" label="Creation Date" type="date" />
-                <InputField name="completionDate" label="Completion Date" type="date" />
+                {/* <InputField name="completionDate" label="Completion Date" type="date" /> */}
               </div>
             </FormikStepper.Step>
         </FormikStepper>
