@@ -25,7 +25,6 @@ const JobCardSchema = Yup.object().shape({
   adapterSerialNumber: Yup.string().required("Adapter serial number is required"),
   warrantyStatus: Yup.string().required("Warranty status is required"),
   problemDescription: Yup.string().required("Problem description is required"),
-  technicianId: Yup.string().required("Technician ID is required"),
   status: Yup.string().required("Status is required"),
   creationDate: Yup.date().required("Creation date is required"),
   // completionDate: Yup.date().nullable(),
@@ -100,7 +99,7 @@ const JobCard = () => {
         },
         body: JSON.stringify({
           problem_description: values.problemDescription,
-          status: values.status,
+          status: "Pending",
           device_id: deviceId,
         }),
       });
@@ -268,19 +267,6 @@ const JobCard = () => {
             <FormikStepper.Step label="Job Details" labelColor="#37bf5e" circleColor="#37bf5e">
               <div className="space-y-4">
                 <InputField as="textarea" name="problemDescription" label="Problem Description" rows="4" />
-                <InputField name="technicianId" label="Technician ID" />
-              <SelectField
-                name="status"
-                label="Status"
-                labelColor="#dc3545"
-                placeholder="Select"
-                className="w-auto p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                options={[
-                  { value: "pending", label: "Pending" },
-                  { value: "in progress", label: "In progress" },
-                  { value: "completed", label: "Completed" },
-                ]}
-              />
                 {/* <InputField name="completionDate" label="Completion Date" type="date" /> */}
               </div>
             </FormikStepper.Step>
