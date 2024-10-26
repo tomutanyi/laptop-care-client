@@ -126,7 +126,7 @@ const JobCard = () => {
   
 
   return (
-    <div className="min-h-screen bg-gradient-to-tl from-yellow-50 to-yellow-100 flex items-center justify-center">
+    <div className="min-h-screen flex items-center justify-center">
       <div className="w-full max-w-xl p-8 bg-white rounded-lg shadow-lg">
         <FormikStepper
           onSubmit={onSubmit}
