@@ -1,9 +1,11 @@
 import React from 'react';
+import JobCard
 
+  from './JobCard';
 const Receptionist = () => {
   return (
-    <div className="min-h-screen flex items-center justify-center">
-      <h1 className="text-3xl">Receptionist Dashboard</h1>
+    <div className="min-h-screen flex bg-gradient-to-tl from-yellow-50 to-yellow-100 items-center justify-center">
+      <JobCard />
     </div>
   );
 };
