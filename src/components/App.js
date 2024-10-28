@@ -8,6 +8,7 @@ import Login from './Login';
 import JobCard from './JobCard';
 import Technician from './Technician';
 import Admin from './Admin';
+import Receptionist from './Receptionist';
 
 const App = () => {
   return (
@@ -16,12 +17,13 @@ const App = () => {
         <div>
           <Navbar />
           <Routes>
-            <Route path="/home" element={<h1>Welcome to the Laptop Care App</h1>} />
+            <Route path="/" element={<h1>Welcome to the Laptop Care App</h1>} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/login" element={<Login />} />
-            <Route path="/" element={<JobCard />} />
+            <Route path="/jobcard" element={<JobCard />} />
             <Route path="/technician" element={<Technician />} />
             <Route path="/admin" element={<Admin />} />
+            <Route path="/receptionist" element={<Receptionist />} />
           </Routes>
         </div>
       </Router>

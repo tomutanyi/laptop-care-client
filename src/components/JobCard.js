@@ -25,7 +25,6 @@ const JobCardSchema = Yup.object().shape({
   adapterSerialNumber: Yup.string().required("Adapter serial number is required"),
   warrantyStatus: Yup.string().required("Warranty status is required"),
   problemDescription: Yup.string().required("Problem description is required"),
-  technicianId: Yup.string().required("Technician ID is required"),
   status: Yup.string().required("Status is required"),
   creationDate: Yup.date().required("Creation date is required"),
   // completionDate: Yup.date().nullable(),
@@ -36,61 +35,98 @@ const JobCard = () => {
 
   const technicianId = localStorage.getItem("technicianId") || "";
 
-
   const onSubmit = async (values, { setSubmitting, resetForm }) => {
+    setSubmitting(true); // Indicate that form submission is in progress
     try {
-      const response = await fetch("http://127.0.0.1:5000/jobcards", {
+      // Step 1: Post client data to /clients
+      const clientResponse = await fetch("http://127.0.0.1:5000/clients", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          client: {
-            name: values.clientName,
-            email: values.clientEmail,
-            phone_number: values.clientPhone,
-            address: values.clientAddress,
-          },
-          device: {
-            device_model: values.deviceModel,
-            device_serial_number: values.deviceSerialNumber,
-            brand: values.brand,
-            hdd_or_ssd: values.hddOrSsd,
-            hdd_or_ssd_serial_number: values.hddOrSsdSerialNumber,
-            memory: values.memory,
-            memory_serial_number: values.memorySerialNumber,
-            battery: values.battery,
-            battery_serial_number: values.batterySerialNumber,
-            adapter: values.adapter,
-            adapter_serial_number: values.adapterSerialNumber,
-            warranty_status: values.warrantyStatus,
-          },
-          jobDetails: {
-            problem_description: values.problemDescription,
-            technician_id:technicianId,
-            status: values.status,
-            creation_date: new Date().toISOString(),
-            completion_date: values.completionDate,
-          },
+          name: values.clientName,
+          email: values.clientEmail,
+          phone_number: values.clientPhone,
+          address: values.clientAddress,
         }),
       });
-
-      if (response.ok) {
-        enqueueSnackbar("Job card submitted successfully!", { variant: "success" });
-        resetForm();
-      } else {
-        enqueueSnackbar("Failed to submit job card.", { variant: "error" });
+  
+      if (!clientResponse.ok) {
+        enqueueSnackbar("Failed to submit client data.", { variant: "error" });
+        return; // Exit if client creation fails
       }
+  
+      const clientData = await clientResponse.json();
+      const clientId = clientData.id; // Extract client ID from response
+  
+      // Step 2: Post device data to /devices with clientId
+      const deviceResponse = await fetch("http://127.0.0.1:5000/devices", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          device_serial_number: values.deviceSerialNumber,
+          device_model: values.deviceModel,
+          brand: values.brand,
+          hdd_or_ssd: values.hddOrSsd,
+          hdd_or_ssd_serial_number: values.hddOrSsdSerialNumber,
+          memory: values.memory,
+          memory_serial_number: values.memorySerialNumber,
+          battery: values.battery,
+          battery_serial_number: values.batterySerialNumber,
+          adapter: values.adapter,
+          adapter_serial_number: values.adapterSerialNumber,
+          client_id: clientId,
+          warranty_status: values.warrantyStatus,
+        }),
+      });
+  
+      if (!deviceResponse.ok) {
+        enqueueSnackbar("Failed to submit device data.", { variant: "error" });
+        return; // Exit if device creation fails
+      }
+  
+      const deviceData = await deviceResponse.json();
+      const deviceId = deviceData.id; // Extract device ID from response
+  
+      // Step 3: Post job card data to /jobcards with deviceId
+      const jobCardResponse = await fetch("http://127.0.0.1:5000/jobcards", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          problem_description: values.problemDescription,
+          status: "Pending",
+          device_id: deviceId,
+        }),
+      });
+  
+      if (!jobCardResponse.ok) {
+        enqueueSnackbar("Failed to submit job card.", { variant: "error" });
+        return; // Exit if job card creation fails
+      }
+  
+      // If all requests succeed
+      enqueueSnackbar("Job card submitted successfully!", { variant: "success" });
+      resetForm(); // Clear form data
+  
     } catch (error) {
+      console.error("Error during job card submission:", error);
       enqueueSnackbar("An error occurred while submitting the job card.", { variant: "error" });
-      console.error("Error submitting job card:", error);
     } finally {
-      setSubmitting(false);
+      setSubmitting(false); // Form submission complete
     }
   };
+  
+
+
+  
 
   return (
-    <div className="min-h-screen bg-gradient-to-tl from-yellow-50 to-yellow-100 flex items-center justify-center">
+    <div className="min-h-screen flex items-center justify-center">
       <div className="w-full max-w-xl p-8 bg-white rounded-lg shadow-lg">
         <FormikStepper
           onSubmit={onSubmit}
@@ -231,19 +267,6 @@ const JobCard = () => {
             <FormikStepper.Step label="Job Details" labelColor="#37bf5e" circleColor="#37bf5e">
               <div className="space-y-4">
                 <InputField as="textarea" name="problemDescription" label="Problem Description" rows="4" />
-                <InputField name="technicianId" label="Technician ID" />
-              <SelectField
-                name="status"
-                label="Status"
-                labelColor="#dc3545"
-                placeholder="Select"
-                className="w-auto p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                options={[
-                  { value: "pending", label: "Pending" },
-                  { value: "in progress", label: "In progress" },
-                  { value: "completed", label: "Completed" },
-                ]}
-              />
                 {/* <InputField name="completionDate" label="Completion Date" type="date" /> */}
               </div>
             </FormikStepper.Step>
