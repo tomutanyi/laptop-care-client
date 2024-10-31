@@ -220,6 +220,12 @@ const JobCard = () => {
                   { value: "apple", label: "Apple" },
                   { value: "dell", label: "Dell" },
                   { value: "hp", label: "HP" },
+                  { value: "lenovo", label: "Lenovo" },
+                  { value: "asus", label: "ASUS" },
+                  { value: "msi", label: "MSI" },
+                  { value: "acer", label: "Acer" },
+                  { value: "samsung", label: "Samsung" },
+                  { value: "other", label: "Other"}
                   // Add more brands as needed
                 ]}
                 className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
