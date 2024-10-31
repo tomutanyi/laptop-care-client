@@ -99,7 +99,7 @@ const JobCard = () => {
         },
         body: JSON.stringify({
           problem_description: values.problemDescription,
-          status: "Pending",
+          status: "PENDING",
           device_id: deviceId,
         }),
       });
