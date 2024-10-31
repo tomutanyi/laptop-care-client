@@ -7,7 +7,7 @@ const Admin = () => {
   const [loading, setLoading] = useState(true); // Loading state
   const { enqueueSnackbar } = useSnackbar();
 
-  useEffect(() => {
+
     const fetchJobCards = async () => {
       setLoading(true);
       try {
@@ -43,9 +43,29 @@ const Admin = () => {
       }
     };
 
-    fetchJobCards();
-  }, [enqueueSnackbar]);
+  // Approve purchase for job cards in progress
+  const approvePurchase = async (id) => {
+    try {
+      const response = await fetch(`http://127.0.0.1:5000/jobcards/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: "APPROVED_FOR_PURCHASE", progress_notes: "Purchase approved" }),
+      });
 
+      if (!response.ok) throw new Error("Failed to approve purchase");
+
+      enqueueSnackbar("Purchase authorized", { variant: "success" });
+      // Update the status of the job card locally
+      fetchJobCards();
+    } catch (error) {
+      console.error("Error approving purchase:", error);
+      enqueueSnackbar("Error approving purchase.", { variant: "error" });
+    }
+  };
+  useEffect(() => {
+  fetchJobCards();
+  }, []);
+  
   // Function to handle category click
   const handleCategoryClick = (status) => {
     setExpandedCategory(expandedCategory === status ? null : status);
@@ -60,6 +80,7 @@ const Admin = () => {
     acc[status].push(jobCard);
     return acc;
   }, {});
+
 
   return (
     <div className="min-h-screen bg-background flex flex-col items-center py-8">
@@ -92,6 +113,16 @@ const Admin = () => {
                       <p className="text-gray-600"><span className="font-medium">Device Model:</span> {jobCard.device_model || "N/A"}</p>
                       <p className="text-gray-600"><span className="font-medium">Device Brand:</span> {jobCard.device_brand || "N/A"}</p>
                       <p className="text-gray-600"><span className="font-medium">Problem Description:</span> {jobCard.problem_description || "N/A"}</p>
+                      <p className="text-gray-600"><span className="font-medium">Diagnostics:</span> {jobCard.progress_notes || "N/A"}</p>
+                      {/* Show "Approve Purchase" button for job cards with "IN_PROGRESS" status */}
+                      {jobCard.status === "In Progress" && (
+                        <button
+                          onClick={() => approvePurchase(jobCard.id)}
+                          className="bg-green-500 text-white px-4 py-2 mt-4 rounded hover:bg-green-600 transition"
+                        >
+                          Authorize Purchase
+                        </button>
+                      )}
                     </div>
                   ))}
                 </div>
