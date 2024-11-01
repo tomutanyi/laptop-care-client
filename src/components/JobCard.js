@@ -30,6 +30,7 @@ const JobCard = () => {
   const { enqueueSnackbar } = useSnackbar();
   const technicianId = localStorage.getItem("technicianId") || "";
   const [existingClient, setExistingClient] = useState(null);
+  const [deviceExists, setDeviceExists] = useState(null)
 
   const onClientPhoneBlur = async (phone) => {
     try {
@@ -49,39 +50,32 @@ const JobCard = () => {
     }
   };
 
+  // Function to fetch device data based on deviceSerialNumber
+  const onDeviceSerialNumberBlur = async (serialNumber) => {
+    try {
+      const response = await fetch(`http://127.0.0.1:5000/devices/search?device_serial_number=${serialNumber}`);
+      if (response.ok) {
+        const data = await response.json();
+        if (data.message === "Device not found") {
+          setDeviceExists(null);
+        } else {
+          setDeviceExists(data);
+          enqueueSnackbar("Existing device data found. Prefilling form.", { variant: "info" });
+        }
+      }
+    } catch (error) {
+      console.error("Error checking device serial number:", error);
+      enqueueSnackbar("Error checking device serial number", { variant: "error" });
+    }
+  };
+
+
   const onSubmit = async (values, { setSubmitting, resetForm }) => {
     setSubmitting(true);
     try {
       const clientId = existingClient ? existingClient.id : await createClient(values);
+      const deviceId = deviceExists ? deviceExists.id : await createDevice(values, clientId);
 
-      const deviceResponse = await fetch("http://127.0.0.1:5000/devices", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          device_serial_number: values.deviceSerialNumber,
-          device_model: values.deviceModel,
-          brand: values.brand,
-          hdd_or_ssd: values.hddOrSsd,
-          hdd_or_ssd_serial_number: values.hddOrSsdSerialNumber,
-          memory: values.memory,
-          memory_serial_number: values.memorySerialNumber,
-          battery: values.battery,
-          battery_serial_number: values.batterySerialNumber,
-          adapter: values.adapter,
-          adapter_serial_number: values.adapterSerialNumber,
-          client_id: clientId,
-          warranty_status: values.warrantyStatus,
-        }),
-      });
-  
-      if (!deviceResponse.ok) {
-        enqueueSnackbar("Failed to submit device data.", { variant: "error" });
-        return;
-      }
-  
-      const deviceData = await deviceResponse.json();
-      const deviceId = deviceData.id;
-  
       const jobCardResponse = await fetch("http://127.0.0.1:5000/jobcards", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -91,14 +85,16 @@ const JobCard = () => {
           device_id: deviceId,
         }),
       });
-  
+
       if (!jobCardResponse.ok) {
         enqueueSnackbar("Failed to submit job card.", { variant: "error" });
         return;
       }
-  
+
       enqueueSnackbar("Job card submitted successfully!", { variant: "success" });
       resetForm();
+      setExistingClient(null); // Clear form on submit
+      setDeviceExists(null);
     } catch (error) {
       console.error("Error during job card submission:", error);
       enqueueSnackbar("An error occurred while submitting the job card.", { variant: "error" });
@@ -125,6 +121,35 @@ const JobCard = () => {
     return clientData.id;
   };
 
+  const createDevice = async (values, clientId) => {
+    const deviceResponse = await fetch("http://127.0.0.1:5000/devices", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        device_serial_number: values.deviceSerialNumber,
+        device_model: values.deviceModel,
+        brand: values.brand,
+        hdd_or_ssd: values.hddOrSsd,
+        hdd_or_ssd_serial_number: values.hddOrSsdSerialNumber,
+        memory: values.memory,
+        memory_serial_number: values.memorySerialNumber,
+        battery: values.battery,
+        battery_serial_number: values.batterySerialNumber,
+        adapter: values.adapter,
+        adapter_serial_number: values.adapterSerialNumber,
+        client_id: clientId,
+        warranty_status: values.warrantyStatus,
+      }),
+    });
+
+    if (!deviceResponse.ok) {
+      throw new Error("Failed to create device");
+    }
+
+    const deviceData = await deviceResponse.json();
+    return deviceData.id;
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-tl from-yellow-50 to-yellow-100 flex items-center justify-center">
       <div className="w-full max-w-xl p-8 bg-white rounded-lg shadow-lg">
@@ -135,18 +160,18 @@ const JobCard = () => {
             clientEmail: existingClient?.email || "",
             clientPhone: existingClient?.phone_number || "",
             clientAddress: existingClient?.address || "",
-            deviceModel: "",
-            deviceSerialNumber: "",
-            brand: "",
-            hddOrSsd: "",
-            hddOrSsdSerialNumber: "",
-            memory: "",
-            memorySerialNumber: "",
-            battery: "",
-            batterySerialNumber: "",
-            adapter: "",
-            adapterSerialNumber: "",
-            warrantyStatus: "in_warranty",
+            deviceModel: deviceExists?.device_model || "",
+            deviceSerialNumber: deviceExists?.device_serial_number || "",
+            brand: deviceExists?.brand || "",
+            hddOrSsd: deviceExists?.hdd_or_ssd || "",
+            hddOrSsdSerialNumber: deviceExists?.hdd_or_ssd_serial_number || "",
+            memory: deviceExists?.memory || "",
+            memorySerialNumber: deviceExists?.memory_serial_number || "",
+            battery: deviceExists?.battery || "",
+            batterySerialNumber: deviceExists?.battery_serial_number || "",
+            adapter: deviceExists?.adapter || "",
+            adapterSerialNumber: deviceExists?.adapter_serial_number || "",
+            warrantyStatus: deviceExists?.warranty_status || "in_warranty",
             problemDescription: "",
             technicianId,
             status: "pending",
@@ -212,6 +237,7 @@ const JobCard = () => {
                 name="deviceSerialNumber"
                 label="Device Serial Number"
                 className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                onBlur={(e) => onDeviceSerialNumberBlur(e.target.value)}
               />
               <SelectField
                 name="brand"
