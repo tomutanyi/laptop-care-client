@@ -1,11 +1,8 @@
 import * as Yup from "yup";
-import {
-  FormikStepper,
-  InputField,
-  SelectField,
-} from "formik-stepper";
+import { FormikStepper, InputField, SelectField } from "formik-stepper";
 import "formik-stepper/dist/style.css";
 import { useSnackbar } from "notistack";
+import { useState} from "react";
 
 const JobCardSchema = Yup.object().shape({
   clientName: Yup.string().required("Client name is required"),
@@ -27,45 +24,39 @@ const JobCardSchema = Yup.object().shape({
   problemDescription: Yup.string().required("Problem description is required"),
   status: Yup.string().required("Status is required"),
   creationDate: Yup.date().required("Creation date is required"),
-  // completionDate: Yup.date().nullable(),
 });
 
 const JobCard = () => {
   const { enqueueSnackbar } = useSnackbar();
-
   const technicianId = localStorage.getItem("technicianId") || "";
+  const [existingClient, setExistingClient] = useState(null);
+
+  const onClientPhoneBlur = async (phone) => {
+    try {
+      const response = await fetch(`http://127.0.0.1:5000/clients/search?phone_number=${phone}`);
+      if (response.ok) {
+        const data = await response.json();
+        if (data.message === "Client not found") {
+          setExistingClient(null);
+        } else {
+          setExistingClient(data);
+          enqueueSnackbar("Existing client data found. Prefilling form.", { variant: "info" });
+        }
+      }
+    } catch (error) {
+      console.error("Error checking client phone number:", error);
+      enqueueSnackbar("Error checking client phone number", { variant: "error" });
+    }
+  };
 
   const onSubmit = async (values, { setSubmitting, resetForm }) => {
-    setSubmitting(true); // Indicate that form submission is in progress
+    setSubmitting(true);
     try {
-      // Step 1: Post client data to /clients
-      const clientResponse = await fetch("http://127.0.0.1:5000/clients", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          name: values.clientName,
-          email: values.clientEmail,
-          phone_number: values.clientPhone,
-          address: values.clientAddress,
-        }),
-      });
-  
-      if (!clientResponse.ok) {
-        enqueueSnackbar("Failed to submit client data.", { variant: "error" });
-        return; // Exit if client creation fails
-      }
-  
-      const clientData = await clientResponse.json();
-      const clientId = clientData.id; // Extract client ID from response
-  
-      // Step 2: Post device data to /devices with clientId
+      const clientId = existingClient ? existingClient.id : await createClient(values);
+
       const deviceResponse = await fetch("http://127.0.0.1:5000/devices", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           device_serial_number: values.deviceSerialNumber,
           device_model: values.deviceModel,
@@ -85,18 +76,15 @@ const JobCard = () => {
   
       if (!deviceResponse.ok) {
         enqueueSnackbar("Failed to submit device data.", { variant: "error" });
-        return; // Exit if device creation fails
+        return;
       }
   
       const deviceData = await deviceResponse.json();
-      const deviceId = deviceData.id; // Extract device ID from response
+      const deviceId = deviceData.id;
   
-      // Step 3: Post job card data to /jobcards with deviceId
       const jobCardResponse = await fetch("http://127.0.0.1:5000/jobcards", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           problem_description: values.problemDescription,
           status: "Pending",
@@ -106,149 +94,192 @@ const JobCard = () => {
   
       if (!jobCardResponse.ok) {
         enqueueSnackbar("Failed to submit job card.", { variant: "error" });
-        return; // Exit if job card creation fails
+        return;
       }
   
-      // If all requests succeed
       enqueueSnackbar("Job card submitted successfully!", { variant: "success" });
-      resetForm(); // Clear form data
-  
+      resetForm();
     } catch (error) {
       console.error("Error during job card submission:", error);
       enqueueSnackbar("An error occurred while submitting the job card.", { variant: "error" });
     } finally {
-      setSubmitting(false); // Form submission complete
+      setSubmitting(false);
     }
   };
-  
 
-
-  
+  const createClient = async (values) => {
+    const clientResponse = await fetch("http://127.0.0.1:5000/clients", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name: values.clientName,
+        email: values.clientEmail,
+        phone_number: values.clientPhone,
+        address: values.clientAddress,
+      }),
+    });
+    if (!clientResponse.ok) {
+      throw new Error("Failed to create client");
+    }
+    const clientData = await clientResponse.json();
+    return clientData.id;
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center">
       <div className="w-full max-w-xl p-8 bg-white rounded-lg shadow-lg">
         <FormikStepper
           onSubmit={onSubmit}
-        initialValues={{
-          clientName: "",
-          clientEmail: "",
-          clientPhone: "",
-          clientAddress: "",
-          deviceModel: "",
-          deviceSerialNumber: "",
-          brand: "",
-          hddOrSsd: "",
-          hddOrSsdSerialNumber: "",
-          memory: "",
-          memorySerialNumber: "",
-          battery: "",
-          batterySerialNumber: "",
-          adapter: "",
-          adapterSerialNumber: "",
-          warrantyStatus: "in_warranty",
-          problemDescription: "",
-          technicianId: technicianId,
-          status: "pending",
-          creationDate: new Date().toISOString(),
-          completionDate: "",
-        }}
-        validationSchema={JobCardSchema}
-        withStepperLine
-        nextButton={{
-          label: "Next Step",
-          className: "bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition",
-        }}
-        prevButton={{
-          label: "Previous",
-          className: "bg-gray-300 text-gray-800 px-4 py-2 rounded hover:bg-gray-400 transition",
-        }}
-        submitButton={{
-          label: "Submit",
-          className: "bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition",
-        }}
+          initialValues={{
+            clientName: existingClient?.name || "",
+            clientEmail: existingClient?.email || "",
+            clientPhone: existingClient?.phone_number || "",
+            clientAddress: existingClient?.address || "",
+            deviceModel: "",
+            deviceSerialNumber: "",
+            brand: "",
+            hddOrSsd: "",
+            hddOrSsdSerialNumber: "",
+            memory: "",
+            memorySerialNumber: "",
+            battery: "",
+            batterySerialNumber: "",
+            adapter: "",
+            adapterSerialNumber: "",
+            warrantyStatus: "in_warranty",
+            problemDescription: "",
+            technicianId,
+            status: "pending",
+            creationDate: new Date().toISOString(),
+            completionDate: "",
+          }}
+          validationSchema={JobCardSchema}
+          enableReinitialize={true}  // Add this line
+          withStepperLine
+          nextButton={{
+            label: "Next Step",
+            className: "bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition",
+          }}
+          prevButton={{
+            label: "Previous",
+            className: "bg-gray-300 text-gray-800 px-4 py-2 rounded hover:bg-gray-400 transition",
+          }}
+          submitButton={{
+            label: "Submit",
+            className: "bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition",
+          }}
         >
-          {/* First Step: Client Information */}
-          <FormikStepper.Step
-            label="Client Info"
-            labelColor="#37bf5e"
-            circleColor="#37bf5e"
-          >
-            <div className="flex flex-col ">
+          {/* Step 1: Client Information */}
+          <FormikStepper.Step label="Client Info" labelColor="#37bf5e" circleColor="#37bf5e">
+            <div className="flex flex-col space-y-2">
               <InputField
-                name="clientName" label="Client Name"
+                name="clientName"
+                label="Client Name"
                 className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                disabled={!!existingClient}
               />
               <InputField
-                name="clientEmail" label="Email" type="email"
+                name="clientEmail"
+                label="Email"
+                type="email"
                 className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                disabled={!!existingClient}
               />
               <InputField
-                name="clientPhone" label="Client Phone"
+                name="clientPhone"
+                label="Client Phone"
                 className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                onBlur={(e) => onClientPhoneBlur(e.target.value)}
               />
               <InputField
-                name="clientAddress" label="Client Address"
+                name="clientAddress"
+                label="Client Address"
                 className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                disabled={!!existingClient}
               />
             </div>
           </FormikStepper.Step>
 
-          {/* Second Step: Device Information */}
-          <FormikStepper.Step label="Device Info" circleColor="#6f42c1">
+          {/* Step 2: Device Information */}
+          <FormikStepper.Step label="Device Info" labelColor="#37bf5e" circleColor="#37bf5e">
             <div className="flex flex-col space-y-2">
               <InputField
-                name="deviceModel" label="Device Model"
+                name="deviceModel"
+                label="Device Model"
                 className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
               <InputField
-                name="deviceSerialNumber" label="Device Serial Number"
+                name="deviceSerialNumber"
+                label="Device Serial Number"
                 className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
-              <InputField
-                name="brand" label="Brand"
+              <SelectField
+                name="brand"
+                label="Brand"
+                options={[
+                  { value: "apple", label: "Apple" },
+                  { value: "dell", label: "Dell" },
+                  { value: "hp", label: "HP" },
+                  { value: "lenovo", label: "Lenovo" },
+                  { value: "asus", label: "ASUS" },
+                  { value: "msi", label: "MSI" },
+                  { value: "acer", label: "Acer" },
+                  { value: "samsung", label: "Samsung" },
+                  { value: "other", label: "Other"}
+                  // Add more brands as needed
+                ]}
                 className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
               <SelectField
                 name="hddOrSsd"
-                label="HDD/SSD Type"
+                label="HDD or SSD"
                 options={[
-                  { value: "HDD", label: "HDD" },
-                  { value: "SSD", label: "SSD" },
+                  { value: "hdd", label: "HDD" },
+                  { value: "ssd", label: "SSD" },
                 ]}
                 className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
               <InputField
-                name="hddOrSsdSerialNumber" label="HDD/SSD Serial Number"
+                name="hddOrSsdSerialNumber"
+                label="HDD/SSD Serial Number"
                 className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
               <InputField
-                name="memory" label="Memory"
-                className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-          </FormikStepper.Step>
-
-          {/*Step 3: More Device Information*/}
-          <FormikStepper.Step label="Device Info" circleColor="#6f42c1">
-            <div className="flex flex-col space-y-2" >
-               <InputField
-                name="memorySerialNumber" label="Memory Serial Number"
+                name="memory"
+                label="Memory"
                 className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
               <InputField
-                name="battery" label="Battery Type"
+                name="memorySerialNumber"
+                label="Memory Serial Number"
+                className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <SelectField
+                name="battery"
+                label="Battery Type"
+                options={[
+                  { value: "lithium-ion", label: "Lithium-Ion" },
+                  { value: "lithium-polymer", label: "Lithium-Polymer" },
+                ]}
                 className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
               <InputField
-                name="batterySerialNumber" label="Battery Serial Number"
-              className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"/>
-              <InputField
-                name="adapter" label="Adapter Type"
+                name="batterySerialNumber"
+                label="Battery Serial Number"
+                className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <SelectField
+                name="adapter"
+                label="Adapter Type"
+                options={[
+                  { value: "standard", label: "Standard" },
+                  { value: "high-power", label: "High Power" },
+                ]}
                 className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
               <InputField
-                name="adapterSerialNumber" label="Adapter Serial Number"
+                name="adapterSerialNumber"
+                label="Adapter Serial Number"
                 className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
               <SelectField
@@ -263,13 +294,18 @@ const JobCard = () => {
             </div>
           </FormikStepper.Step>
 
-          {/* Step 4: Job Details */}
-            <FormikStepper.Step label="Job Details" labelColor="#37bf5e" circleColor="#37bf5e">
-              <div className="space-y-4">
-                <InputField as="textarea" name="problemDescription" label="Problem Description" rows="4" />
-                {/* <InputField name="completionDate" label="Completion Date" type="date" /> */}
-              </div>
-            </FormikStepper.Step>
+          {/* Step 3: Problem Description */}
+          <FormikStepper.Step label="Problem Description" labelColor="#37bf5e" circleColor="#37bf5e">
+            <div className="flex flex-col space-y-2">
+              <InputField
+                name="problemDescription"
+                label="Problem Description"
+                component="textarea"
+                rows={4}
+                className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+          </FormikStepper.Step>
         </FormikStepper>
       </div>
     </div>
