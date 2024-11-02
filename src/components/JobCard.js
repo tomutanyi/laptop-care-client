@@ -174,7 +174,7 @@ const JobCard = () => {
             warrantyStatus: deviceExists?.warranty_status || "in_warranty",
             problemDescription: "",
             technicianId,
-            status: "pending",
+            status: "Pending",
             creationDate: new Date().toISOString(),
             completionDate: "",
           }}
@@ -232,6 +232,7 @@ const JobCard = () => {
                 name="deviceModel"
                 label="Device Model"
                 className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                disabled={!!deviceExists}
               />
               <InputField
                 name="deviceSerialNumber"
@@ -274,11 +275,13 @@ const JobCard = () => {
                 name="memory"
                 label="Memory"
                 className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                disabled={!!deviceExists}
               />
               <InputField
                 name="memorySerialNumber"
                 label="Memory Serial Number"
                 className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                disabled={!!deviceExists}
               />
               <SelectField
                 name="battery"
@@ -288,11 +291,13 @@ const JobCard = () => {
                   { value: "lithium-polymer", label: "Lithium-Polymer" },
                 ]}
                 className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                disabled={!!deviceExists}
               />
               <InputField
                 name="batterySerialNumber"
                 label="Battery Serial Number"
                 className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                disabled={!!deviceExists}
               />
               <SelectField
                 name="adapter"
@@ -307,6 +312,7 @@ const JobCard = () => {
                 name="adapterSerialNumber"
                 label="Adapter Serial Number"
                 className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                disabled={!!deviceExists}
               />
               <SelectField
                 name="warrantyStatus"
@@ -316,6 +322,7 @@ const JobCard = () => {
                   { value: "out_of_warranty", label: "Out of Warranty" },
                 ]}
                 className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                disabled={!!deviceExists}
               />
             </div>
           </FormikStepper.Step>
