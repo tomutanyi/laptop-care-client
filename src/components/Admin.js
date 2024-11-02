@@ -3,8 +3,8 @@ import { useSnackbar } from "notistack";
 
 const Admin = () => {
   const [jobCards, setJobCards] = useState([]);
-  const [expandedCategory, setExpandedCategory] = useState(null); // State to track the expanded category
-  const [loading, setLoading] = useState(true); // Loading state
+  const [expandedCategory, setExpandedCategory] = useState(null);
+  const [loading, setLoading] = useState(true); 
   const { enqueueSnackbar } = useSnackbar();
 
   useEffect(() => {
