@@ -2,7 +2,7 @@ import * as Yup from "yup";
 import { FormikStepper, InputField, SelectField } from "formik-stepper";
 import "formik-stepper/dist/style.css";
 import { useSnackbar } from "notistack";
-import { useState} from "react";
+import { useState, useEffect} from "react";
 
 const JobCardSchema = Yup.object().shape({
   clientName: Yup.string().required("Client name is required"),
@@ -22,6 +22,7 @@ const JobCardSchema = Yup.object().shape({
   adapterSerialNumber: Yup.string().required("Adapter serial number is required"),
   warrantyStatus: Yup.string().required("Warranty status is required"),
   problemDescription: Yup.string().required("Problem description is required"),
+  assignedTechnician: Yup.string().required("Assigned technician id is required"),
   status: Yup.string().required("Status is required"),
   creationDate: Yup.date().required("Creation date is required"),
 });
@@ -31,6 +32,29 @@ const JobCard = () => {
   const technicianId = localStorage.getItem("technicianId") || "";
   const [existingClient, setExistingClient] = useState(null);
   const [deviceExists, setDeviceExists] = useState(null)
+  const [technicians, setTechnicians] = useState([]);
+  const [selectedTechnician, setSelectedTechnician] = useState("");
+
+  // Function to fetch all users with the role of technician
+  const fetchTechnicians = async () => {
+    try {
+      const response = await fetch("http://127.0.0.1:5000/users/technicians"); 
+      const technicians = await response.json();
+      if (response.ok) {
+        setTechnicians(technicians);
+        console.log("Fetched technicians:", technicians);
+      } else {
+        enqueueSnackbar("Failed to fetch technicians.", { variant: "error" });
+      }
+    } catch (error) {
+      console.error("Error fetching technicians:", error);
+      enqueueSnackbar("Error fetching technicians", { variant: "error" });
+    }
+  };
+
+  useEffect(() => {
+    fetchTechnicians();
+  }, []);
 
   const onClientPhoneBlur = async (phone) => {
     try {
@@ -83,18 +107,25 @@ const JobCard = () => {
           problem_description: values.problemDescription,
           status: "Pending",
           device_id: deviceId,
+          assigned_technician_id: values.assignedTechnician
         }),
       });
 
       if (!jobCardResponse.ok) {
+        if (!selectedTechnician && !technicianId) {
+          enqueueSnackbar("Please assign a technician before submitting.", { variant: "warning" });
+          return;
+      } 
         enqueueSnackbar("Failed to submit job card.", { variant: "error" });
         return;
       }
+ 
 
       enqueueSnackbar("Job card submitted successfully!", { variant: "success" });
       resetForm();
       setExistingClient(null); // Clear form on submit
       setDeviceExists(null);
+      setSelectedTechnician(""); // Clear selected technician on submit
     } catch (error) {
       console.error("Error during job card submission:", error);
       enqueueSnackbar("An error occurred while submitting the job card.", { variant: "error" });
@@ -173,7 +204,7 @@ const JobCard = () => {
             adapterSerialNumber: deviceExists?.adapter_serial_number || "",
             warrantyStatus: deviceExists?.warranty_status || "in_warranty",
             problemDescription: "",
-            technicianId,
+            assignedTechnician: "",
             status: "Pending",
             creationDate: new Date().toISOString(),
             completionDate: "",
@@ -255,6 +286,7 @@ const JobCard = () => {
                   { value: "other", label: "Other"}
                   // Add more brands as needed
                 ]}
+                disabled={!!deviceExists}
                 className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
               <SelectField
@@ -264,11 +296,13 @@ const JobCard = () => {
                   { value: "hdd", label: "HDD" },
                   { value: "ssd", label: "SSD" },
                 ]}
+                disabled={!!deviceExists}
                 className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
               <InputField
                 name="hddOrSsdSerialNumber"
                 label="HDD/SSD Serial Number"
+                disabled={!!deviceExists}
                 className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
               <InputField
@@ -306,6 +340,7 @@ const JobCard = () => {
                   { value: "standard", label: "Standard" },
                   { value: "high-power", label: "High Power" },
                 ]}
+                disabled={!!deviceExists}
                 className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
               <InputField
@@ -336,6 +371,16 @@ const JobCard = () => {
                 component="textarea"
                 rows={4}
                 className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <SelectField
+                  name="assignedTechnician"
+                  label="Assigned Technician"
+                  options={technicians.map((tech) => ({
+                    value: tech.id,
+                    label: tech.username,
+                  }))}
+                  onChange={(e) => setSelectedTechnician(e.target.value)}
+                  fullWidth
               />
             </div>
           </FormikStepper.Step>
