@@ -9,6 +9,7 @@ import JobCard from './JobCard';
 import Technician from './Technician';
 import Admin from './Admin';
 import Receptionist from './Receptionist';
+import JobCardExpanded from './JobCardExpanded';
 
 const App = () => {
   return (
@@ -24,6 +25,7 @@ const App = () => {
             <Route path="/technician" element={<Technician />} />
             <Route path="/admin" element={<Admin />} />
             <Route path="/receptionist" element={<Receptionist />} />
+            <Route path="/jobcard/:jobId" element={<JobCardExpanded />} />
           </Routes>
         </div>
       </Router>
