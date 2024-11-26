@@ -28,7 +28,7 @@ const JobCardExpanded = () => {
         <div className="p-6 bg-primary rounded-lg shadow-lg">
           <h2 className="text-2xl font-semibold">{jobDetails.client_name}</h2>
           <p>Email: {jobDetails.client_email}</p>
-          <p>Status: {jobDetails.status}</p>
+          <p>Status: {jobDetails.jobcards_status}</p>
           {/* Add more details as needed */}
         </div>
       ) : (
