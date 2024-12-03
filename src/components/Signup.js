@@ -184,7 +184,7 @@ const Signup = () => {
               <option value="">Select a role</option>
               <option value="admin">Admin</option>
               <option value="technician">Technician</option>
-              <option value="clerk">Clerk</option>
+              <option value="receptionist">Receptionist</option>
             </select>
             {formik.touched.role && formik.errors.role && (
               <div className="mt-1 text-sm text-red-500">

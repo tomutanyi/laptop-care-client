@@ -48,6 +48,8 @@ const Login = () => {
           navigate('/admin');
         } else if (role === 'technician') {
           navigate('/technician');
+        } else if (role === 'receptionist') {
+          navigate('/receptionist');
         } else {
           // Default navigation for other roles, e.g., clerk
           navigate('/');
