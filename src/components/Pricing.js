@@ -11,7 +11,7 @@ const Pricing = () => {
     const fetchJobCards = async () => {
       try {
         const response = await fetch(
-          `http://127.0.0.1:5000/jobcards?status=pricing`
+          `https://laptop-care-server.onrender.com/jobcards?status=pricing`
         );
 
         if (!response.ok) {

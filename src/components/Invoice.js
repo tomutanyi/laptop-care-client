@@ -16,7 +16,7 @@ const Invoice = () => {
   useEffect(() => {
     const fetchJobDetails = async () => {
       try {
-        const response = await fetch(`http://127.0.0.1:5000/jobcards/${jobId}/details`);
+        const response = await fetch(`https://laptop-care-server.onrender.com/jobcards/${jobId}/details`);
         if (!response.ok) {
           throw new Error("Failed to fetch job details");
         }
@@ -71,7 +71,7 @@ const Invoice = () => {
       };
 
       // Send invoice data to the server
-      const response = await fetch('http://127.0.0.1:5000/jobcards/generate-invoice', {
+      const response = await fetch('https://laptop-care-server.onrender.com/jobcards/generate-invoice', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -85,7 +85,7 @@ const Invoice = () => {
       }
 
       // Update jobcard status to Completed
-      const updateResponse = await fetch(`http://127.0.0.1:5000/jobcards/${jobId}/update`, {
+      const updateResponse = await fetch(`https://laptop-care-server.onrender.com/jobcards/${jobId}/update`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',

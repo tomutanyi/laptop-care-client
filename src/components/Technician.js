@@ -18,7 +18,7 @@ const Technician = () => {
         }
 
         const response = await fetch(
-          `http://127.0.0.1:5000/jobcards?status=Assigned&assigned_technician_id=${technicianId}`
+          `https://laptop-care-server.onrender.com/jobcards?status=Assigned&assigned_technician_id=${technicianId}`
         );
 
         if (!response.ok) {
