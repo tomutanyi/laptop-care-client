@@ -99,7 +99,7 @@ const JobCard = () => {
     try {
       const clientId = existingClient ? existingClient.id : await createClient(values);
       const deviceId = deviceExists ? deviceExists.id : await createDevice(values, clientId);
-
+  
       const jobCardResponse = await fetch("http://127.0.0.1:5000/jobcards", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -107,21 +107,39 @@ const JobCard = () => {
           problem_description: values.problemDescription,
           status: "Pending",
           device_id: deviceId,
-          assigned_technician_id: values.assignedTechnician
+          assigned_technician_id: values.assignedTechnician,
+          email_data: {
+            recipient: values.clientEmail,
+            subject: "Device Service Update",
+            body: "Your device service is in progress.",
+            client_name: values.clientName,
+            device_details: {
+              brand: values.brand,
+              model: values.deviceModel,
+              serial_number: values.deviceSerialNumber
+            }
+          }
         }),
       });
-
+  
+      const jobCardData = await jobCardResponse.json();
+  
       if (!jobCardResponse.ok) {
         if (!selectedTechnician && !technicianId) {
           enqueueSnackbar("Please assign a technician before submitting.", { variant: "warning" });
           return;
-      } 
+        } 
         enqueueSnackbar("Failed to submit job card.", { variant: "error" });
         return;
       }
- 
-
-      enqueueSnackbar("Job card submitted successfully!", { variant: "success" });
+  
+      // Check email sending status
+      if (jobCardData.email_sent) {
+        enqueueSnackbar("Job card submitted successfully and email sent!", { variant: "success" });
+      } else {
+        enqueueSnackbar("Job card submitted, but failed to send email notification.", { variant: "warning" });
+      }
+  
       resetForm();
       setExistingClient(null); // Clear form on submit
       setDeviceExists(null);
