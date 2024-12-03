@@ -53,11 +53,21 @@ const Technician = () => {
               className="p-6 bg-primary rounded-lg shadow-lg border border-gray-200 hover:shadow-xl transition-shadow duration-300 cursor-pointer"
               onClick={() => handleCardClick(jobCard)}
             >
-              <h2 className="text-xl font-semibold text-gray-700 mb-2">
-                {jobCard.client_name || "Client Name Not Available"}
-              </h2>
-              <p className="text-gray-600"><span className="font-medium">Email:</span> {jobCard.client_email || "N/A"}</p>
-              <p className="text-gray-600"><span className="font-medium">Status:</span> {jobCard.status}</p>
+              <div className="flex justify-between items-start mb-3">
+                <h2 className="text-xl font-semibold text-gray-700">
+                  Job Card #{jobCard.id}
+                </h2>
+                <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                  jobCard.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' : 
+                  jobCard.status === 'pricing' ? 'bg-blue-100 text-blue-800' : 
+                  'bg-gray-100 text-gray-800'
+                }`}>
+                  {jobCard.status}
+                </span>
+              </div>
+              <p className="text-gray-600">
+                <span className="font-medium">Problem:</span> {jobCard.problem_description || "N/A"}
+              </p>
             </div>
           ))
         ) : (
