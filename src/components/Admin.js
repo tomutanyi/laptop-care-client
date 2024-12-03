@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useSnackbar } from "notistack";
 import { Bar, Pie } from 'react-chartjs-2';
+import { Link } from 'react-router-dom';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -120,124 +121,133 @@ const Admin = () => {
   }, {});
 
   return (
-    <div className="min-h-screen bg-background flex flex-col items-center py-8">
-      <h1 className="text-3xl font-bold text-gray-800 mb-8">Admin Dashboard</h1>
-      
-      {loading ? (
-        <div className="flex flex-col justify-center items-center h-64 space-y-4">
-          <h1 className="text-xl font-semibold text-gray-700">Loading Dashboard...</h1>
-          <div className="animate-spin border-8 border-t-8 border-gray-300 border-t-blue-500 rounded-full w-16 h-16"></div>
-          <p className="text-sm text-gray-500">Please wait a moment.</p>
+    <div className="min-h-screen bg-background p-8">
+      <div className="max-w-7xl mx-auto">
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="text-3xl font-bold text-gray-800">Admin Dashboard</h1>
+          <Link
+            to="/pricing"
+            className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
+          >
+            View Pricing Dashboard
+          </Link>
         </div>
-      ) : (
-        <>
-          {/* Analytics Overview */}
-          <div className="w-full max-w-6xl mb-8">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <div className="bg-white p-6 rounded-lg shadow-md">
-                <h3 className="text-lg font-semibold text-gray-700">Total Jobs</h3>
-                <p className="text-3xl font-bold text-blue-600">{analytics.totalJobs}</p>
+        {loading ? (
+          <div className="flex flex-col justify-center items-center h-64 space-y-4">
+            <h1 className="text-xl font-semibold text-gray-700">Loading Dashboard...</h1>
+            <div className="animate-spin border-8 border-t-8 border-gray-300 border-t-blue-500 rounded-full w-16 h-16"></div>
+            <p className="text-sm text-gray-500">Please wait a moment.</p>
+          </div>
+        ) : (
+          <>
+            {/* Analytics Overview */}
+            <div className="w-full max-w-6xl mb-8">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div className="bg-white p-6 rounded-lg shadow-md">
+                  <h3 className="text-lg font-semibold text-gray-700">Total Jobs</h3>
+                  <p className="text-3xl font-bold text-blue-600">{analytics.totalJobs}</p>
+                </div>
+                {Object.entries(analytics.statusDistribution).map(([status, count]) => (
+                  <div key={status} className="bg-white p-6 rounded-lg shadow-md">
+                    <h3 className="text-lg font-semibold text-gray-700">{status}</h3>
+                    <p className="text-3xl font-bold text-blue-600">{count}</p>
+                  </div>
+                ))}
               </div>
-              {Object.entries(analytics.statusDistribution).map(([status, count]) => (
-                <div key={status} className="bg-white p-6 rounded-lg shadow-md">
-                  <h3 className="text-lg font-semibold text-gray-700">{status}</h3>
-                  <p className="text-3xl font-bold text-blue-600">{count}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Charts */}
-          <div className="w-full max-w-6xl grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-            {/* Status Distribution Chart */}
-            <div className="bg-white p-6 rounded-lg shadow-md">
-              <h3 className="text-lg font-semibold text-gray-700 mb-4">Status Distribution</h3>
-              <Pie
-                data={{
-                  labels: Object.keys(analytics.statusDistribution),
-                  datasets: [
-                    {
-                      data: Object.values(analytics.statusDistribution),
-                      backgroundColor: [
-                        '#FF6384',
-                        '#36A2EB',
-                        '#FFCE56',
-                        '#4BC0C0',
-                        '#9966FF',
-                      ],
-                    },
-                  ],
-                }}
-                options={{
-                  responsive: true,
-                  plugins: {
-                    legend: {
-                      position: 'bottom',
-                    },
-                  },
-                }}
-              />
             </div>
 
-            {/* Brand Distribution Chart */}
-            <div className="bg-white p-6 rounded-lg shadow-md">
-              <h3 className="text-lg font-semibold text-gray-700 mb-4">Device Brands</h3>
-              <Bar
-                data={{
-                  labels: Object.keys(analytics.brandDistribution),
-                  datasets: [
-                    {
-                      label: 'Number of Devices',
-                      data: Object.values(analytics.brandDistribution),
-                      backgroundColor: '#36A2EB',
+            {/* Charts */}
+            <div className="w-full max-w-6xl grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+              {/* Status Distribution Chart */}
+              <div className="bg-white p-6 rounded-lg shadow-md">
+                <h3 className="text-lg font-semibold text-gray-700 mb-4">Status Distribution</h3>
+                <Pie
+                  data={{
+                    labels: Object.keys(analytics.statusDistribution),
+                    datasets: [
+                      {
+                        data: Object.values(analytics.statusDistribution),
+                        backgroundColor: [
+                          '#FF6384',
+                          '#36A2EB',
+                          '#FFCE56',
+                          '#4BC0C0',
+                          '#9966FF',
+                        ],
+                      },
+                    ],
+                  }}
+                  options={{
+                    responsive: true,
+                    plugins: {
+                      legend: {
+                        position: 'bottom',
+                      },
                     },
-                  ],
-                }}
-                options={{
-                  responsive: true,
-                  plugins: {
-                    legend: {
-                      position: 'bottom',
-                    },
-                  },
-                }}
-              />
-            </div>
-          </div>
+                  }}
+                />
+              </div>
 
-          {/* Job Cards List */}
-          <div className="w-full max-w-6xl">
-            <h2 className="text-2xl font-bold text-gray-800 mb-6">Job Cards</h2>
-            <div className="w-full max-w-4xl space-y-6">
-              {Object.keys(categorizedJobCards).map((status) => (
-                <div key={status}>
-                  <h2 
-                    className="text-xl font-semibold text-gray-700 mb-2 cursor-pointer"
-                    onClick={() => handleCategoryClick(status)}
-                  >
-                    {status} ({categorizedJobCards[status].length})
-                  </h2>
-                  {expandedCategory === status && (
-                    <div className="space-y-4">
-                      {categorizedJobCards[status].map((jobCard, index) => (
-                        <div key={index} className="p-6 bg-primary rounded-lg shadow-lg border border-gray-200 hover:shadow-xl transition-shadow duration-300">
-                          <h3 className="text-lg font-semibold text-gray-700 mb-2">
-                            {jobCard.client_name || "Client Name Not Available"}
-                          </h3>
-                          <p className="text-gray-600"><span className="font-medium">Email:</span> {jobCard.client_email || "N/A"}</p>
-                          <p className="text-gray-600"><span className="font-medium">Device Model:</span> {jobCard.device_model || "N/A"}</p>
-                          <p className="text-gray-600"><span className="font-medium">Device Brand:</span> {jobCard.device_brand || "N/A"}</p>
-                          <p className="text-gray-600"><span className="font-medium">Problem Description:</span> {jobCard.problem_description || "N/A"}</p>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              ))}
+              {/* Brand Distribution Chart */}
+              <div className="bg-white p-6 rounded-lg shadow-md">
+                <h3 className="text-lg font-semibold text-gray-700 mb-4">Device Brands</h3>
+                <Bar
+                  data={{
+                    labels: Object.keys(analytics.brandDistribution),
+                    datasets: [
+                      {
+                        label: 'Number of Devices',
+                        data: Object.values(analytics.brandDistribution),
+                        backgroundColor: '#36A2EB',
+                      },
+                    ],
+                  }}
+                  options={{
+                    responsive: true,
+                    plugins: {
+                      legend: {
+                        position: 'bottom',
+                      },
+                    },
+                  }}
+                />
+              </div>
             </div>
-          </div>
-        </>
-      )}
+
+            {/* Job Cards List */}
+            <div className="w-full max-w-6xl">
+              <h2 className="text-2xl font-bold text-gray-800 mb-6">Job Cards</h2>
+              <div className="w-full max-w-4xl space-y-6">
+                {Object.keys(categorizedJobCards).map((status) => (
+                  <div key={status}>
+                    <h2 
+                      className="text-xl font-semibold text-gray-700 mb-2 cursor-pointer"
+                      onClick={() => handleCategoryClick(status)}
+                    >
+                      {status} ({categorizedJobCards[status].length})
+                    </h2>
+                    {expandedCategory === status && (
+                      <div className="space-y-4">
+                        {categorizedJobCards[status].map((jobCard, index) => (
+                          <div key={index} className="p-6 bg-primary rounded-lg shadow-lg border border-gray-200 hover:shadow-xl transition-shadow duration-300">
+                            <h3 className="text-lg font-semibold text-gray-700 mb-2">
+                              {jobCard.client_name || "Client Name Not Available"}
+                            </h3>
+                            <p className="text-gray-600"><span className="font-medium">Email:</span> {jobCard.client_email || "N/A"}</p>
+                            <p className="text-gray-600"><span className="font-medium">Device Model:</span> {jobCard.device_model || "N/A"}</p>
+                            <p className="text-gray-600"><span className="font-medium">Device Brand:</span> {jobCard.device_brand || "N/A"}</p>
+                            <p className="text-gray-600"><span className="font-medium">Problem Description:</span> {jobCard.problem_description || "N/A"}</p>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </>
+        )}
+      </div>
     </div>
   );
 };

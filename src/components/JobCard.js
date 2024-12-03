@@ -105,7 +105,7 @@ const JobCard = () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           problem_description: values.problemDescription,
-          status: "Pending",
+          status: "Assigned",
           device_id: deviceId,
           assigned_technician_id: values.assignedTechnician,
           email_data: {
@@ -223,7 +223,7 @@ const JobCard = () => {
             warrantyStatus: deviceExists?.warranty_status || "in_warranty",
             problemDescription: "",
             assignedTechnician: "",
-            status: "Pending",
+            status: "Assigned",
             creationDate: new Date().toISOString(),
             completionDate: "",
           }}
