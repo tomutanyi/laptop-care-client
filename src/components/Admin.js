@@ -39,7 +39,7 @@ const Admin = () => {
     const fetchJobCards = async () => {
       setLoading(true);
       try {
-        const response = await fetch("https://laptop-care-server.onrender.com/jobcards");
+        const response = await fetch("http://127.0.0.1:5000//jobcards");
         
         if (!response.ok) {
           throw new Error("Failed to fetch job cards");
@@ -49,7 +49,7 @@ const Admin = () => {
         
         const enrichedJobCards = await Promise.all(data.map(async (jobCard) => {
           try {
-            const jobCardDetailResponse = await fetch(`https://laptop-care-server.onrender.com/jobcards/${jobCard.id}/details`);
+            const jobCardDetailResponse = await fetch(`http://127.0.0.1:5000//jobcards/${jobCard.id}/details`);
             if (!jobCardDetailResponse.ok) {
               throw new Error(`Failed to fetch details for job card ID: ${jobCard.id}`);
             }

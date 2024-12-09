@@ -16,7 +16,7 @@ const JobCardExpanded = () => {
   useEffect(() => {
     const fetchJobDetails = async () => {
       try {
-        const response = await fetch(`https://laptop-care-server.onrender.com/jobcards/${jobId}/details`);
+        const response = await fetch(`http://127.0.0.1:5000/jobcards/${jobId}/details`);
         if (!response.ok) {
           throw new Error("Failed to fetch job details");
         }
@@ -34,7 +34,7 @@ const JobCardExpanded = () => {
   const handleSaveDiagnostic = async () => {
     setIsSaving(true);
     try {
-      const response = await fetch(`https://laptop-care-server.onrender.com/jobcards/${jobId}/update`, {
+      const response = await fetch(`http://127.0.0.1:5000/jobcards/${jobId}/update`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',

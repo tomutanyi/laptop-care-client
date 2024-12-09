@@ -13,6 +13,7 @@ import JobCardExpanded from './JobCardExpanded';
 import Pricing from './Pricing';
 import PricingExpanded from './PricingExpanded';
 import Invoice from './Invoice';
+import Home from './Home';
 
 const App = () => {
   return (
@@ -21,7 +22,7 @@ const App = () => {
         <div>
           <Navbar />
           <Routes>
-            <Route path="/" element={<h1>Welcome to the Laptop Care App</h1>} />
+            <Route path="/" element={<Home />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/login" element={<Login />} />
             <Route path="/jobcard" element={<JobCard />} />
