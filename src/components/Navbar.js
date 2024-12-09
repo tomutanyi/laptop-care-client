@@ -13,7 +13,7 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="bg-blue-600 p-4">
+    <nav className="bg-blue-600 p-4 min-w-full">
       <div className="container mx-auto flex justify-between items-center">
         <div className="text-white font-bold text-xl">
           Laptop Care
