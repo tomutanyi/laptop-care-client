@@ -2,23 +2,16 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSnackbar } from "notistack";
 
-const Technician = () => {
+const Pricing = () => {
   const [jobCards, setJobCards] = useState([]);
   const { enqueueSnackbar } = useSnackbar();
-  const navigate = useNavigate(); // Use navigate from react-router-dom
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchJobCards = async () => {
       try {
-        const technicianId = localStorage.getItem("id"); // Assuming user_id is stored in localStorage
-
-        if (!technicianId) {
-          enqueueSnackbar("User not logged in", { variant: "error" });
-          return;
-        }
-
         const response = await fetch(
-          `http://127.0.0.1:5000/jobcards?status=Assigned&assigned_technician_id=${technicianId}`
+          `http://127.0.0.1:5000/jobcards?status=pricing`
         );
 
         if (!response.ok) {
@@ -37,19 +30,18 @@ const Technician = () => {
   }, [enqueueSnackbar]);
 
   const handleCardClick = (jobCard) => {
-    // Navigate to the JobCardExpanded route with the job ID
-    navigate(`/jobcard/${jobCard.id}`);
+    navigate(`/pricing/${jobCard.id}`);
   };
 
   return (
     <div className="min-h-screen bg-background flex flex-col items-center py-8">
-      <h1 className="text-3xl font-bold text-gray-800 mb-8">Assigned Job Cards</h1>
+      <h1 className="text-3xl font-bold text-gray-800 mb-8">Pricing Job Cards</h1>
 
       <div className="w-full max-w-4xl space-y-6">
         {jobCards.length > 0 ? (
-          jobCards.map((jobCard, index) => (
+          jobCards.map((jobCard) => (
             <div
-              key={index}
+              key={jobCard.id}
               className="p-6 bg-primary rounded-lg shadow-lg border border-gray-200 hover:shadow-xl transition-shadow duration-300 cursor-pointer"
               onClick={() => handleCardClick(jobCard)}
             >
@@ -57,25 +49,29 @@ const Technician = () => {
                 <h2 className="text-xl font-semibold text-gray-700">
                   Job Card #{jobCard.id}
                 </h2>
-                <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                  jobCard.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' : 
-                  jobCard.status === 'pricing' ? 'bg-blue-100 text-blue-800' : 
-                  'bg-gray-100 text-gray-800'
-                }`}>
+                <span className="px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
                   {jobCard.status}
                 </span>
               </div>
-              <p className="text-gray-600">
-                <span className="font-medium">Problem:</span> {jobCard.problem_description || "N/A"}
-              </p>
+              <div className="space-y-2">
+                <p className="text-gray-600">
+                  <span className="font-medium">Device:</span> {jobCard.device_brand} {jobCard.device_model}
+                </p>
+                <p className="text-gray-600">
+                  <span className="font-medium">Problem:</span> {jobCard.problem_description || "N/A"}
+                </p>
+                <p className="text-gray-600">
+                  <span className="font-medium">Diagnostic:</span> {jobCard.diagnostic || "N/A"}
+                </p>
+              </div>
             </div>
           ))
         ) : (
-          <p className="text-gray-600">No pending job cards found.</p>
+          <p className="text-gray-600">No job cards in pricing stage found.</p>
         )}
       </div>
     </div>
   );
 };
 
-export default Technician;
+export default Pricing;
