@@ -7,13 +7,20 @@ import Navbar from './Navbar';
 import Login from './Login';
 import JobCard from './JobCard';
 import Technician from './Technician';
-import Admin from './Admin';
+import Analytics from './Analytics';
 import Receptionist from './Receptionist';
-import JobCardExpanded from './JobCardExpanded';
+import ApprovedExpanded from './ApprovedExpanded';
 import Pricing from './Pricing';
 import PricingExpanded from './PricingExpanded';
 import Invoice from './Invoice';
 import Home from './Home';
+import Approved from './Approved';
+import Assigned from './Assigned';
+import AssignedExpanded from './AssignedExpanded';
+import Pending from './Pending';
+import PendingExpanded from './PendingExpanded';
+import Admin from './Admin';
+import Rejected from './Rejected';
 
 const App = () => {
   return (
@@ -43,12 +50,20 @@ const AppContent = () => {
         <Route path="/login" element={<Login />} />
         <Route path="/jobcard" element={<JobCard />} />
         <Route path="/technician" element={<Technician />} />
-        <Route path="/admin" element={<Admin />} />
+        <Route path="/analytics" element={<Analytics />} />
         <Route path="/receptionist" element={<Receptionist />} />
-        <Route path="/jobcard/:jobId" element={<JobCardExpanded />} />
+        <Route path="/approved/:jobId" element={<ApprovedExpanded />} />
         <Route path="/pricing" element={<Pricing />} />
         <Route path="/pricing/:jobId" element={<PricingExpanded />} />
         <Route path="/invoice/:jobId" element={<Invoice />} />
+        <Route path="*" element={<div>404 Not Found</div>} />
+        <Route path="/approved" element={<Approved />} />
+        <Route path="/assigned" element={<Assigned />} />
+        <Route path="/assigned/:jobId" element={<AssignedExpanded />} />
+        <Route path="/pending" element={<Pending />} />
+        <Route path="/pending/:jobId" element={<PendingExpanded />} />
+        <Route path="/admin" element={<Admin />} />
+        <Route path="/rejected" element={<Rejected />} />
       </Routes>
     </div>
   );

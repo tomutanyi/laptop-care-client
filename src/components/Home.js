@@ -20,7 +20,7 @@ const Home = () => {
       </section>
 
       {/* Quick Links Section */}
-      <section className="py-16 bg-white">
+      {/* <section className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">
             Quick Links
@@ -73,7 +73,7 @@ const Home = () => {
             </Link>
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* Staff Role Information */}
       <section className="py-16 bg-gray-50">
