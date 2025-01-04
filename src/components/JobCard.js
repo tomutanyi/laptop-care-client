@@ -2,7 +2,7 @@ import * as Yup from "yup";
 import { FormikStepper, InputField, SelectField } from "formik-stepper";
 import "formik-stepper/dist/style.css";
 import { useSnackbar } from "notistack";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Sidebar from "./Sidebar"; // Import the Sidebar component
 
 const JobCardSchema = Yup.object().shape({
@@ -39,7 +39,7 @@ const JobCard = () => {
   const [selectedTechnician, setSelectedTechnician] = useState("");
 
   // Function to fetch all users with the role of technician
-  const fetchTechnicians = async () => {
+  const fetchTechnicians = useCallback(async () => {
     try {
       const response = await fetch("http://127.0.0.1:5000/users/technicians");
       const technicians = await response.json();
@@ -52,11 +52,11 @@ const JobCard = () => {
       console.error("Error fetching technicians:", error);
       enqueueSnackbar("Error fetching technicians", { variant: "error" });
     }
-  };
-
+  }, [enqueueSnackbar]);  // Make sure any dependencies are included here
+  
   useEffect(() => {
     fetchTechnicians();
-  }, []);
+  }, [fetchTechnicians]);
 
   const onClientPhoneBlur = async (phone) => {
     try {
