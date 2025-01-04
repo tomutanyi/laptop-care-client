@@ -1,14 +1,12 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSnackbar } from "notistack";
 import Sidebar from "./Sidebar"; // Import the Sidebar component
-import { UserContext } from "../components/UserContext"; // Assuming you have a UserContext for user data
 
 const Pending = () => {
   const [jobCards, setJobCards] = useState([]);
   const { enqueueSnackbar } = useSnackbar();
   const navigate = useNavigate(); // Use navigate from react-router-dom
-  const { user } = useContext(UserContext); // Get user info if needed
 
   useEffect(() => {
     const fetchJobCards = async () => {

@@ -1,9 +1,7 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect } from "react";
 import { useSnackbar } from "notistack";
 import { Bar, Pie } from "react-chartjs-2";
-import { FaUserCircle, FaSignOutAlt, FaHome, FaChartBar, FaCoins } from "react-icons/fa";
-import { Link, useNavigate } from "react-router-dom"; 
-import { UserContext } from "./UserContext"; 
+import { Link } from "react-router-dom"; 
 import Sidebar from "./Sidebar"; // Import the Sidebar component
 
 // Chart.js setup
@@ -30,8 +28,7 @@ const Analytics = () => {
   const [selectedStatus, setSelectedStatus] = useState(null);
   const [expandedJobCard, setExpandedJobCard] = useState(null);
   const { enqueueSnackbar } = useSnackbar();
-  const { user, logout } = useContext(UserContext); // Get user info and logout function
-  const navigate = useNavigate();
+
 
   useEffect(() => {
     const fetchJobCards = async () => {
@@ -74,11 +71,7 @@ const Analytics = () => {
     : [];
 
   
-  const handleLogout = () => {
-    logout();
-    navigate('/login')
-    enqueueSnackbar("Logged out successfully", { variant: "success" });
-  };
+
 
   return (
     <div className="flex min-h-screen bg-gray-50">

@@ -135,6 +135,11 @@ const PendingExpanded = () => {
               <h3 className="text-lg font-medium">Problem Description</h3>
               <p className="text-gray-600">{jobDetails.problem_description}</p>
             </div>
+            <div className="mb-4">
+              <h3 className="text-lg font-medium">Email</h3>
+              <p className="text-gray-600">{jobDetails.client_email}</p>
+            </div>
+
 
             <div className="mb-4">
               <h3 className="text-lg font-medium">Diagnostic</h3>
