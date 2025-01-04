@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSnackbar } from "notistack";
+import Sidebar from "./Sidebar"; // Import the Sidebar component
 
 const Pricing = () => {
   const [jobCards, setJobCards] = useState([]);
@@ -11,7 +12,7 @@ const Pricing = () => {
     const fetchJobCards = async () => {
       try {
         const response = await fetch(
-          `https://laptop-care-server.onrender.com/jobcards?status=pricing`
+          `http://127.0.0.1:5000/jobcards?status=Pricing`
         );
 
         if (!response.ok) {
@@ -34,41 +35,45 @@ const Pricing = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col items-center py-8">
-      <h1 className="text-3xl font-bold text-gray-800 mb-8">Pricing Job Cards</h1>
+    <div className="flex min-h-screen bg-background">
+      <Sidebar /> {/* Render the Sidebar component on the left */}
 
-      <div className="w-full max-w-4xl space-y-6">
-        {jobCards.length > 0 ? (
-          jobCards.map((jobCard) => (
-            <div
-              key={jobCard.id}
-              className="p-6 bg-primary rounded-lg shadow-lg border border-gray-200 hover:shadow-xl transition-shadow duration-300 cursor-pointer"
-              onClick={() => handleCardClick(jobCard)}
-            >
-              <div className="flex justify-between items-start mb-3">
-                <h2 className="text-xl font-semibold text-gray-700">
-                  Job Card #{jobCard.id}
-                </h2>
-                <span className="px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
-                  {jobCard.status}
-                </span>
+      <div className="flex-1 flex flex-col items-center py-8">
+        <h1 className="text-3xl font-bold text-gray-800 mb-8">Pricing Job Cards</h1>
+
+        <div className="w-full max-w-4xl space-y-6">
+          {jobCards.length > 0 ? (
+            jobCards.map((jobCard) => (
+              <div
+                key={jobCard.id}
+                className="p-6 bg-primary rounded-lg shadow-lg border border-gray-200 hover:shadow-xl transition-shadow duration-300 cursor-pointer"
+                onClick={() => handleCardClick(jobCard)}
+              >
+                <div className="flex justify-between items-start mb-3">
+                  <h2 className="text-xl font-semibold text-gray-700">
+                    Job Card #{jobCard.id}
+                  </h2>
+                  <span className="px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+                    {jobCard.status}
+                  </span>
+                </div>
+                <div className="space-y-2">
+                  <p className="text-gray-600">
+                    <span className="font-medium">Device:</span> {jobCard.device_brand} {jobCard.device_model}
+                  </p>
+                  <p className="text-gray-600">
+                    <span className="font-medium">Problem:</span> {jobCard.problem_description || "N/A"}
+                  </p>
+                  <p className="text-gray-600">
+                    <span className="font-medium">Diagnostic:</span> {jobCard.diagnostic || "N/A"}
+                  </p>
+                </div>
               </div>
-              <div className="space-y-2">
-                <p className="text-gray-600">
-                  <span className="font-medium">Device:</span> {jobCard.device_brand} {jobCard.device_model}
-                </p>
-                <p className="text-gray-600">
-                  <span className="font-medium">Problem:</span> {jobCard.problem_description || "N/A"}
-                </p>
-                <p className="text-gray-600">
-                  <span className="font-medium">Diagnostic:</span> {jobCard.diagnostic || "N/A"}
-                </p>
-              </div>
-            </div>
-          ))
-        ) : (
-          <p className="text-gray-600">No job cards in pricing stage found.</p>
-        )}
+            ))
+          ) : (
+            <p className="text-gray-600">No job cards in pricing stage found.</p>
+          )}
+        </div>
       </div>
     </div>
   );
