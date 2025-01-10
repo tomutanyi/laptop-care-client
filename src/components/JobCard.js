@@ -139,17 +139,6 @@ const JobCard = () => {
           status: "Assigned",
           device_id: deviceId,
           assigned_technician_id: values.assignedTechnician,
-          email_data: {
-            recipient: values.clientEmail,
-            subject: "Device Service Update",
-            body: "Your device service is in progress.",
-            client_name: values.clientName,
-            device_details: {
-              brand: values.brand,
-              model: values.deviceModel,
-              serial_number: values.deviceSerialNumber,
-            },
-          },
           hdd_or_ssd_onboard: values.hddOrSsdOnboard,
           memory_onboard: values.memoryOnboard,
         }),
@@ -208,7 +197,7 @@ const JobCard = () => {
 
       // Check email sending status
       if (jobCardData.email_sent) {
-        enqueueSnackbar("Job card submitted successfully and email sent!", { variant: "success" });
+        enqueueSnackbar("Job card submitted successfully!", { variant: "success" });
       } else {
         enqueueSnackbar("Job card submitted, but failed to send email notification.", { variant: "warning" });
       }
