@@ -54,16 +54,19 @@ const Invoice = () => {
     const vatRate = 0.16;
     const total = calculateTotal();
     const vatAmount = total * vatRate;
-    const newTotal = total + vatAmount;
 
     // Add VAT line item
     setItems([...items, { type: 'VAT', description: 'VAT (16%)', price: vatAmount.toFixed(2) }]);
   };
 
+  const calculateGrandTotal = () => {
+    return calculateTotal(); // Grand total includes all items
+  };
+
   const handleGenerateInvoice = async () => {
     setIsGenerating(true);
     try {
-      const totalCost = calculateTotal(); // Total includes VAT if added
+      const totalCost = calculateGrandTotal(); // Use grand total for invoice
       
       // Prepare invoice data in the required format
       const invoiceData = {
@@ -73,12 +76,16 @@ const Invoice = () => {
         client_phone: jobDetails.client_phone,
         device_info: `${jobDetails.device_brand} ${jobDetails.device_model}`,
         diagnostic: jobDetails.diagnostic,
-        items: items.map(item => ({
-          type: item.type,
-          description: item.description,
-          price: parseFloat(item.price),
-          quantity: 1
-        })),
+        items: [
+          ...items.map(item => ({
+            type: item.type,
+            description: item.description,
+            price: parseFloat(item.price),
+            quantity: 1
+          })),
+          // Add Grand Total as a line item
+          { type: 'Total', description: 'Grand Total', price: totalCost.toFixed(2) }
+        ],
         total: totalCost
       };
 
@@ -234,6 +241,9 @@ const Invoice = () => {
                 <div className="mt-4 text-right">
                   <p className="text-xl font-semibold">
                     Total: KsH.{calculateTotal().toFixed(2)}
+                  </p>
+                  <p className="text-xl font-semibold">
+                    Grand Total: KsH.{calculateGrandTotal().toFixed(2)}
                   </p>
                 </div>
               </div>
