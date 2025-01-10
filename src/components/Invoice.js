@@ -13,7 +13,6 @@ const Invoice = () => {
   ]);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
-  const [totalWithVAT, setTotalWithVAT] = useState(0);
 
   useEffect(() => {
     const fetchJobDetails = async () => {
@@ -56,13 +55,15 @@ const Invoice = () => {
     const total = calculateTotal();
     const vatAmount = total * vatRate;
     const newTotal = total + vatAmount;
-    setTotalWithVAT(newTotal);
+
+    // Add VAT line item
+    setItems([...items, { type: 'VAT', description: 'VAT (16%)', price: vatAmount.toFixed(2) }]);
   };
 
   const handleGenerateInvoice = async () => {
     setIsGenerating(true);
     try {
-      const totalCost = totalWithVAT || calculateTotal(); // Use the total with VAT if applied
+      const totalCost = calculateTotal(); // Total includes VAT if added
       
       // Prepare invoice data in the required format
       const invoiceData = {
@@ -185,6 +186,12 @@ const Invoice = () => {
                     >
                       Add Part
                     </button>
+                    <button
+                      onClick={handleApplyVAT}
+                      className="px-3 py-1 bg-yellow-500 text-white rounded-md hover:bg-yellow-600"
+                    >
+                      Apply VAT
+                    </button>
                   </div>
                 </div>
 
@@ -198,6 +205,7 @@ const Invoice = () => {
                       >
                         <option value="service">Service</option>
                         <option value="part">Part</option>
+                        <option value="VAT">VAT</option>
                       </select>
                       <input
                         type="text"
@@ -231,12 +239,6 @@ const Invoice = () => {
               </div>
 
               <div className="flex justify-end">
-                <button
-                  onClick={handleApplyVAT}
-                  className="px-4 py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600"
-                >
-                  Apply VAT
-                </button>
                 <button
                   onClick={() => setShowConfirmModal(true)}
                   disabled={items.length === 0 || isGenerating}
