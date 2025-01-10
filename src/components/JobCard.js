@@ -14,10 +14,10 @@ const JobCardSchema = Yup.object().shape({
   deviceSerialNumber: Yup.string().required("Device serial number is required"),
   brand: Yup.string().required("Brand is required"),
   hddOrSsd: Yup.string().required("HDD/SSD type is required"),
-  hddOrSsdSerialNumber: Yup.string().required("HDD/SSD serial number is required"),
+  hddOrSsdSerialNumber: Yup.string(),
   hddOrSsdOnboard: Yup.string().required("Onboard HDD/SSD type is required"),
   memory: Yup.string().required("Memory is required"),
-  memorySerialNumber: Yup.string().required("Memory serial number is required"),
+  memorySerialNumber: Yup.string(),
   memoryOnboard: Yup.string().required("Onboard memory type is required"),
   battery: Yup.string().required("Battery type is required"),
   batterySerialNumber: Yup.string().required("Battery serial number is required"),
@@ -38,7 +38,6 @@ const JobCard = () => {
   const [technicians, setTechnicians] = useState([]);
   const [selectedTechnician, setSelectedTechnician] = useState("");
 
-  // Function to fetch all users with the role of technician
   const fetchTechnicians = useCallback(async () => {
     try {
       const response = await fetch("http://127.0.0.1:5000/users/technicians");
@@ -52,8 +51,8 @@ const JobCard = () => {
       console.error("Error fetching technicians:", error);
       enqueueSnackbar("Error fetching technicians", { variant: "error" });
     }
-  }, [enqueueSnackbar]);  // Make sure any dependencies are included here
-  
+  }, [enqueueSnackbar]);
+
   useEffect(() => {
     fetchTechnicians();
   }, [fetchTechnicians]);
@@ -94,6 +93,38 @@ const JobCard = () => {
     }
   };
 
+  const sendDeviceDetails = async (values, jobCardId) => {
+    const deviceDetails = {
+      clientName: values.clientName,
+      clientEmail: values.clientEmail,
+      clientPhone: values.clientPhone,
+      clientAddress: values.clientAddress,
+      deviceModel: values.deviceModel,
+      deviceSerialNumber: values.deviceSerialNumber,
+      brand: values.brand,
+      jobCardId: jobCardId,
+      creationDate: "2025-01-10T14:33:17+03:00",
+      memory: values.memory,
+      memorySerialNumber: values.memorySerialNumber,
+      hddOrSsd: values.hddOrSsd,
+      hddOrSsdSerialNumber: values.hddOrSsdSerialNumber,
+      battery: values.battery,
+      batterySerialNumber: values.batterySerialNumber,
+      adapter: values.adapter,
+      adapterSerialNumber: values.adapterSerialNumber,
+    };
+
+    const response = await fetch("http://127.0.0.1:5000/devices/generate-device-details", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(deviceDetails),
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to send device details");
+    }
+  };
+
   const onSubmit = async (values, { setSubmitting, resetForm }) => {
     setSubmitting(true);
     try {
@@ -116,11 +147,11 @@ const JobCard = () => {
             device_details: {
               brand: values.brand,
               model: values.deviceModel,
-              serial_number: values.deviceSerialNumber
-            }
+              serial_number: values.deviceSerialNumber,
+            },
           },
-          hdd_or_ssd_onboard: values.hddOrSsdOnboard, // New field
-          memory_onboard: values.memoryOnboard, // New field
+          hdd_or_ssd_onboard: values.hddOrSsdOnboard,
+          memory_onboard: values.memoryOnboard,
         }),
       });
 
@@ -130,10 +161,50 @@ const JobCard = () => {
         if (!selectedTechnician && !technicianId) {
           enqueueSnackbar("Please assign a technician before submitting.", { variant: "warning" });
           return;
-        } 
+        }
         enqueueSnackbar("Failed to submit job card.", { variant: "error" });
         return;
       }
+
+      // Send device details after job card submission
+      await sendDeviceDetails(values, jobCardData.id);
+
+      // Generate the PDF for the device details
+      const pdfResponse = await fetch("http://127.0.0.1:5000/devices/generate-device-details", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          clientName: values.clientName,
+          clientEmail: values.clientEmail,
+          clientPhone: values.clientPhone,
+          clientAddress: values.clientAddress,
+          deviceModel: values.deviceModel,
+          deviceSerialNumber: values.deviceSerialNumber,
+          brand: values.brand,
+          jobCardId: jobCardData.id,
+          creationDate: "2025-01-10T14:33:17+03:00",
+          memory: values.memory,
+          memorySerialNumber: values.memorySerialNumber,
+          hddOrSsd: values.hddOrSsd,
+          hddOrSsdSerialNumber: values.hddOrSsdSerialNumber,
+          battery: values.battery,
+          batterySerialNumber: values.batterySerialNumber,
+          adapter: values.adapter,
+          adapterSerialNumber: values.adapterSerialNumber,
+        }),
+      });
+
+      if (!pdfResponse.ok) {
+        const errorData = await pdfResponse.json();
+        throw new Error(errorData.error || 'Failed to generate device details PDF');
+      }
+
+      // The response should be the PDF file
+      const pdfBlob = await pdfResponse.blob();
+      const pdfUrl = window.URL.createObjectURL(pdfBlob);
+
+      // Open PDF in a new tab
+      window.open(pdfUrl, '_blank');
 
       // Check email sending status
       if (jobCardData.email_sent) {
@@ -143,9 +214,9 @@ const JobCard = () => {
       }
 
       resetForm();
-      setExistingClient(null); // Clear form on submit
+      setExistingClient(null);
       setDeviceExists(null);
-      setSelectedTechnician(""); // Clear selected technician on submit
+      setSelectedTechnician("");
     } catch (error) {
       console.error("Error during job card submission:", error);
       enqueueSnackbar("An error occurred while submitting the job card.", { variant: "error" });
@@ -190,8 +261,8 @@ const JobCard = () => {
         adapter_serial_number: values.adapterSerialNumber,
         client_id: clientId,
         warranty_status: values.warrantyStatus,
-        hdd_or_ssd_onboard: values.hddOrSsdOnboard, // New field
-        memory_onboard: values.memoryOnboard, // New field
+        hdd_or_ssd_onboard: values.hddOrSsdOnboard,
+        memory_onboard: values.memoryOnboard,
       }),
     });
 
@@ -205,7 +276,7 @@ const JobCard = () => {
 
   return (
     <div className="flex min-h-screen bg-gray-50">
-      <Sidebar /> {/* Render the Sidebar component on the left */}
+      <Sidebar />
       <div className="flex items-center justify-center w-full">
         <div className="w-full max-w-xl p-8 bg-white rounded-lg shadow-lg">
           <FormikStepper
@@ -231,8 +302,8 @@ const JobCard = () => {
               assignedTechnician: "",
               status: "Assigned",
               creationDate: new Date().toISOString(),
-              hddOrSsdOnboard: "", // New field
-              memoryOnboard: "", // New field
+              hddOrSsdOnboard: "",
+              memoryOnboard: "",
             }}
             validationSchema={JobCardSchema}
             enableReinitialize={true}
@@ -300,15 +371,24 @@ const JobCard = () => {
                   name="brand"
                   label="Brand"
                   options={[
-                    { value: "apple", label: "Apple" },
-                    { value: "dell", label: "Dell" },
-                    { value: "hp", label: "HP" },
-                    { value: "lenovo", label: "Lenovo" },
-                    { value: "asus", label: "ASUS" },
-                    { value: "msi", label: "MSI" },
-                    { value: "acer", label: "Acer" },
-                    { value: "samsung", label: "Samsung" },
-                    { value: "other", label: "Other"}
+                      { value: "Google", label: "Google" },
+                      { value: "Apple", label: "Apple" },
+                      { value: "Dell", label: "Dell" },
+                      { value: "HP", label: "HP" },
+                      { value: "Lenovo", label: "Lenovo" },
+                      { value: "Asus", label: "ASUS" },
+                      { value: "Acer", label: "Acer" },
+                      { value: "Microsoft", label: "Microsoft" },
+                      { value: "Razer", label: "Razer" },
+                      { value: "Samsung", label: "Samsung" },
+                      { value: "Toshiba", label: "Toshiba" },
+                      { value: "MSI", label: "MSI" },
+                      { value: "LG", label: "LG" },
+                      { value: "Huawei", label: "Huawei" },
+                      { value: "Alienware", label: "Alienware" },
+                      { value: "Gigabyte", label: "Gigabyte" },
+                      { value: "Other", label: "Other" }
+                  
                   ]}
                   disabled={!!deviceExists}
                   className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -391,7 +471,6 @@ const JobCard = () => {
                   className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   disabled={!!deviceExists}
                 />
-                
               </div>
             </FormikStepper.Step>
 
@@ -406,14 +485,14 @@ const JobCard = () => {
                   className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
                 <SelectField
-                    name="assignedTechnician"
-                    label="Assigned Technician"
-                    options={technicians.map((tech) => ({
-                      value: tech.id,
-                      label: tech.username,
-                    }))}
-                    onChange={(e) => setSelectedTechnician(e.target.value)}
-                    fullWidth
+                  name="assignedTechnician"
+                  label="Assigned Technician"
+                  options={technicians.map((tech) => ({
+                    value: tech.id,
+                    label: tech.username,
+                  }))}
+                  onChange={(e) => setSelectedTechnician(e.target.value)}
+                  fullWidth
                 />
               </div>
             </FormikStepper.Step>
