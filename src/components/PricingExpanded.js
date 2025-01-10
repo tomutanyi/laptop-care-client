@@ -37,7 +37,7 @@ const PricingExpanded = () => {
 
       <div className="flex-1 flex flex-col items-center py-8">
         {jobDetails ? (
-          <div className="p-6 bg-primary rounded-lg shadow-lg w-full max-w-2xl">
+          <div className="p-6 bg-blue-300 rounded-lg shadow-lg w-full max-w-2xl">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-bold text-gray-800">Job Card #{jobDetails.jobcard_id}</h2>
               <div className="flex gap-3">

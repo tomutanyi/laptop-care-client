@@ -46,7 +46,7 @@ const Pricing = () => {
             jobCards.map((jobCard) => (
               <div
                 key={jobCard.id}
-                className="p-6 bg-primary rounded-lg shadow-lg border border-gray-200 hover:shadow-xl transition-shadow duration-300 cursor-pointer"
+                className="p-6 bg-blue-300 rounded-lg shadow-lg border border-gray-200 hover:shadow-xl transition-shadow duration-300 cursor-pointer"
                 onClick={() => handleCardClick(jobCard)}
               >
                 <div className="flex justify-between items-start mb-3">

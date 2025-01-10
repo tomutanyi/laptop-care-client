@@ -13,6 +13,7 @@ const Invoice = () => {
   ]);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [totalWithVAT, setTotalWithVAT] = useState(0);
 
   useEffect(() => {
     const fetchJobDetails = async () => {
@@ -50,16 +51,23 @@ const Invoice = () => {
     return items.reduce((sum, item) => sum + (parseFloat(item.price) || 0), 0);
   };
 
+  const handleApplyVAT = () => {
+    const vatRate = 0.16;
+    const total = calculateTotal();
+    const vatAmount = total * vatRate;
+    const newTotal = total + vatAmount;
+    setTotalWithVAT(newTotal);
+  };
+
   const handleGenerateInvoice = async () => {
     setIsGenerating(true);
     try {
-      const totalCost = calculateTotal();
+      const totalCost = totalWithVAT || calculateTotal(); // Use the total with VAT if applied
       
       // Prepare invoice data in the required format
       const invoiceData = {
         jobcard_id: jobDetails.jobcard_id,
         client_name: jobDetails.client_name,
-
         client_email: jobDetails.client_email,
         client_phone: jobDetails.client_phone,
         device_info: `${jobDetails.device_brand} ${jobDetails.device_model}`,
@@ -223,6 +231,12 @@ const Invoice = () => {
               </div>
 
               <div className="flex justify-end">
+                <button
+                  onClick={handleApplyVAT}
+                  className="px-4 py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600"
+                >
+                  Apply VAT
+                </button>
                 <button
                   onClick={() => setShowConfirmModal(true)}
                   disabled={items.length === 0 || isGenerating}
